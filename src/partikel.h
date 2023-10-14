@@ -13,6 +13,7 @@ struct partikel{
 
 void Wechselwirkung(partikel &p1, partikel &p2, double graviKonst);
 void Bewegen(double deltaT, partikel &p);
+void Aufprall(partikel &p1, partikel &p2);
 void Nullen(partikel &p);
 
 #endif //__PARTIKEL_H_

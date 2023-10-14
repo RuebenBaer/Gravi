@@ -44,6 +44,8 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 		part_lst[i] = new partikel;
 		part_lst[i]->ort[0] = 200 + (double)(rand() % 10000) / 100.0;
 		part_lst[i]->ort[1] = 200 + (double)(rand() % 10000) / 100.0;
+		part_lst[i]->masse = (double)(rand() % 10) + 1.0;
+		part_lst[i]->radius = part_lst[i]->masse / 5;
 		part_lst[i]->ort[2] = 0.0;
 	}
 	
@@ -67,14 +69,14 @@ void MainFrame::OnPaint(wxPaintEvent &event)
 	dc.SetPen(wxPen(wxColor(0, 0, 0)));
 	for(int i = 0; i < anzPartikel; i++)
 	{
-		dc.DrawPoint(part_lst[i]->ort[0], part_lst[i]->ort[1]);
+		dc.DrawCircle(part_lst[i]->ort[0], part_lst[i]->ort[1], part_lst[i]->radius);
 	}
 	return;
 }
 
 void MainFrame::OnTimer(wxTimerEvent& event)
 {
-	double deltaT = timerTick/100.0;
+	double deltaT = timerTick/1000.0;
 	//std::cout<<"Tick: "<<deltaT<<"\n";
 	for(int i = 0; i < anzPartikel; i++)
 	{
