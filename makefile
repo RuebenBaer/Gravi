@@ -44,7 +44,8 @@ SRCDIR = src
 BINDIR = bin
 BIN = $(BINDIR)\gravi.exe
 OBJ = \
-	$(OBJDIR)\base.o
+	$(OBJDIR)\base.o \
+	$(OBJDIR)\partikel.o
 
 .PHONEY: clean all
 
@@ -52,6 +53,10 @@ all: $(OBJ)
 	$(CXX) $(CPPFLAGS) $(DEFS) -L$(WXLIBPATH) -o $(BIN) $(OBJ) -s $(LIBS)
 
 $(OBJDIR)\base.o: $(SRCDIR)\base.cpp
+	if not exist $(OBJDIR) mkdir $(OBJDIR)
+	$(CXX) $(CPPFLAGS) $(DEFS) $(INCLUDES) -c $< -o $@
+
+$(OBJDIR)\partikel.o: $(SRCDIR)\partikel.cpp
 	if not exist $(OBJDIR) mkdir $(OBJDIR)
 	$(CXX) $(CPPFLAGS) $(DEFS) $(INCLUDES) -c $< -o $@
 

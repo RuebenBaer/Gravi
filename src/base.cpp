@@ -20,6 +20,8 @@ bool MainApp::OnInit()
 
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
    EVT_MENU(ID_MAINWIN_QUIT, MainFrame::OnQuit)
+   EVT_PAINT(MainFrame::OnPaint)
+   EVT_TIMER(ID_TIMER, MainFrame::OnTimer)
 END_EVENT_TABLE()
 
 MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size)
@@ -31,13 +33,57 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
     FileMenu->Append(ID_MAINWIN_QUIT, _("&Quit"));
 
     MenuBar->Append(FileMenu, _("&File"));
-    SetMenuBar(MenuBar);
+    SetMenuBar(MenuBar);	
 
     CreateStatusBar(2);
     SetStatusText(_("Hello World!"));
+	
+	srand (time(NULL));
+	for(int i = 0; i < anzPartikel; i++)
+	{
+		part_lst[i] = new partikel;
+		part_lst[i]->ort[0] = 200 + (double)(rand() % 10000) / 100.0;
+		part_lst[i]->ort[1] = 200 + (double)(rand() % 10000) / 100.0;
+		part_lst[i]->ort[2] = 0.0;
+	}
+	
+	timer.SetOwner(this, ID_TIMER);
+	timer.Start(timerTick);
 }
 
 void MainFrame::OnQuit(wxCommandEvent & WXUNUSED(event))
 {
+	timer.Stop();
+	for(int i = 0; i < anzPartikel; i++)
+	{
+		delete part_lst[i];
+	}
     Close(TRUE);
+}
+
+void MainFrame::OnPaint(wxPaintEvent &event)
+{
+	wxPaintDC dc(this);
+	dc.SetPen(wxPen(wxColor(0, 0, 0)));
+	for(int i = 0; i < anzPartikel; i++)
+	{
+		dc.DrawPoint(part_lst[i]->ort[0], part_lst[i]->ort[1]);
+	}
+	return;
+}
+
+void MainFrame::OnTimer(wxTimerEvent& event)
+{
+	double deltaT = timerTick/100.0;
+	//std::cout<<"Tick: "<<deltaT<<"\n";
+	for(int i = 0; i < anzPartikel; i++)
+	{
+		for(int k = i + 1; k < anzPartikel; k++)
+		{
+			Wechselwirkung(*part_lst[i], *part_lst[k], gravKonst);
+		}
+		Bewegen(deltaT, *part_lst[i]);
+	}
+	Refresh();
+	return;
 }
