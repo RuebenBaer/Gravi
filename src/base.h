@@ -18,8 +18,8 @@ class MainFrame: public wxFrame
 		void OnQuit(wxCommandEvent &event);
 		
 	private:
-		partikel *part_lst[50];
-		int anzPartikel = 50;
+		partikel *part_lst[200];
+		int anzPartikel = 200;
 		double gravKonst = 0.00001;
 		wxTimer timer;
 		int timerTick = 50;
