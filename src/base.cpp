@@ -22,6 +22,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
    EVT_MENU(ID_MAINWIN_QUIT, MainFrame::OnQuit)
    EVT_PAINT(MainFrame::OnPaint)
    EVT_TIMER(ID_TIMER, MainFrame::OnTimer)
+   EVT_MOUSEWHEEL(MainFrame::OnMouseWheel)
 END_EVENT_TABLE()
 
 MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size)
@@ -36,7 +37,12 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
     SetMenuBar(MenuBar);	
 
     CreateStatusBar(2);
-    SetStatusText(_("Hello World!"));
+    SetStatusText(_("Gravitationssimulator"));
+	
+	m_wertFkt = 1.0;
+	m_skalierung = 1.0;
+	dc_Offset[0] = dc_Offset[1] = 200;
+	
 	
 	srand (time(NULL));
 	for(int i = 0; i < anzPartikel; i++)
@@ -69,7 +75,9 @@ void MainFrame::OnPaint(wxPaintEvent &event)
 	dc.SetPen(wxPen(wxColor(0, 0, 0)));
 	for(int i = 0; i < anzPartikel; i++)
 	{
-		dc.DrawCircle(part_lst[i]->ort[0], part_lst[i]->ort[1], part_lst[i]->radius);
+		dc.DrawCircle((part_lst[i]->ort[0] + dc_Offset[0]) * m_skalierung,
+						(part_lst[i]->ort[1] + dc_Offset[1]) * m_skalierung,
+						part_lst[i]->radius * m_skalierung);
 	}
 	return;
 }
@@ -88,4 +96,28 @@ void MainFrame::OnTimer(wxTimerEvent& event)
 	}
 	Refresh();
 	return;
+}
+
+void MainFrame::OnMouseWheel(wxMouseEvent& event)
+{
+    wxClientDC dc(this);
+    wxPoint MousePosition = event.GetLogicalPosition(dc);
+    double alteSkalierung = m_skalierung;
+    
+	if(event.GetWheelRotation() < 0)
+	{
+		m_skalierung = m_skalierung / (1 + 0.1 * m_wertFkt);
+	}
+	if(event.GetWheelRotation() > 0)
+	{
+		m_skalierung = m_skalierung * (1 + 0.1 * m_wertFkt);
+	}
+
+	dc_Offset[0] -= MousePosition.x * ((1/alteSkalierung)-(1/m_skalierung));
+	dc_Offset[1] -= MousePosition.y * ((1/alteSkalierung)-(1/m_skalierung));
+	SetStatusText(wxString::Format("Offset: %d - %d / Skalierung: %5.5f", dc_Offset[0], dc_Offset[1], m_skalierung), 1);
+
+    Refresh();
+    event.Skip();
+    return;
 }

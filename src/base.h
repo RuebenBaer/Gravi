@@ -23,8 +23,13 @@ class MainFrame: public wxFrame
 		double gravKonst = 0.00001;
 		wxTimer timer;
 		int timerTick = 50;
+		
+		double m_wertFkt, m_skalierung;
+		int dc_Offset[2];
+		
 		void OnPaint(wxPaintEvent& event);
 		void OnTimer(wxTimerEvent& event);
+		void OnMouseWheel(wxMouseEvent& event);
 		DECLARE_EVENT_TABLE()
 };
 
