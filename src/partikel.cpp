@@ -46,22 +46,23 @@ void Nullen(partikel &p)
 
 void Aufprall(partikel &p1, partikel &p2)
 {
-	double dP[3];
-	double richtAnteil = 0.0;
-	double abstandQuad = 0.0;
-	for(int i = 0; i < 3; i++)
-	{
-		richtAnteil += p1.geschwindigkeit[i] * (p2.ort[i] - p1.ort[i]);
-		dP[i] = (p2.ort[i] - p1.ort[i]);
-		abstandQuad +=  dP[i] * dP[i];
-	}
-	if(!abstandQuad)return;
-	richtAnteil /= abstandQuad;
+	double EModul = 1000.0;
 	
+	double abstand = 0.0;
 	for(int i = 0; i < 3; i++)
 	{
-		p1.geschwindigkeit[i] -= richtAnteil * dP[i] * 0.9 * p2.masse / (p1.masse + p2.masse);
-		p2.geschwindigkeit[i] += richtAnteil * dP[i] * 0.9 * p1.masse / (p1.masse + p2.masse);
+		abstand += (p1.ort[i] - p2.ort[i]) * (p1.ort[i] - p2.ort[i]);
 	}
+	abstand = sqrt(abstand);
+	double delta1 = 1.0 - (abstand - p2.radius) / p1.radius;
+	double delta2 = 1.0 - (abstand - p1.radius) / p2.radius;
+	
+	if(!abstand)return;
+	for(int i = 0; i < 3; i++)
+	{
+		p1.kraft[i] += (p1.ort[i]-p2.ort[i]) * delta1 * EModul / abstand;
+		p2.kraft[i] += (p2.ort[i]-p1.ort[i]) * delta2 * EModul / abstand;
+	}
+	
 	return;
 }

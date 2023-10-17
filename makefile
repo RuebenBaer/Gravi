@@ -52,11 +52,11 @@ OBJ = \
 all: $(OBJ)
 	$(CXX) $(CPPFLAGS) $(DEFS) -L$(WXLIBPATH) -o $(BIN) $(OBJ) -s $(LIBS)
 
-$(OBJDIR)\base.o: $(SRCDIR)\base.cpp
+$(OBJDIR)\base.o: $(SRCDIR)\base.cpp $(SRCDIR)\base.h
 	if not exist $(OBJDIR) mkdir $(OBJDIR)
 	$(CXX) $(CPPFLAGS) $(DEFS) $(INCLUDES) -c $< -o $@
 
-$(OBJDIR)\partikel.o: $(SRCDIR)\partikel.cpp
+$(OBJDIR)\partikel.o: $(SRCDIR)\partikel.cpp $(SRCDIR)\partikel.h
 	if not exist $(OBJDIR) mkdir $(OBJDIR)
 	$(CXX) $(CPPFLAGS) $(DEFS) $(INCLUDES) -c $< -o $@
 
