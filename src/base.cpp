@@ -48,8 +48,8 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 	for(int i = 0; i < anzPartikel; i++)
 	{
 		part_lst[i] = new partikel;
-		part_lst[i]->ort[0] = 200 + (double)(rand() % 10000) / 100.0;
-		part_lst[i]->ort[1] = 200 + (double)(rand() % 10000) / 100.0;
+		part_lst[i]->ort[0] = 200 + (double)(rand() % 2500) / 100.0;
+		part_lst[i]->ort[1] = 200 + (double)(rand() % 2500) / 100.0;
 		part_lst[i]->masse = (double)(rand() % 10) + 1.0;
 		part_lst[i]->radius = part_lst[i]->masse / 5;
 		part_lst[i]->ort[2] = 0.0;
@@ -57,6 +57,8 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 	
 	timer.SetOwner(this, ID_TIMER);
 	timer.Start(timerTick);
+	
+	Maximize(true);
 }
 
 void MainFrame::OnQuit(wxCommandEvent & WXUNUSED(event))
