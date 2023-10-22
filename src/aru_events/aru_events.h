@@ -9,7 +9,7 @@ class aruDblEvent;
 class aruColourEvent;
 
 /*aruDblEvent*/
-wxDEFINE_EVENT(aruEVT_DOUBLE, aruDblEvent);
+wxDECLARE_EVENT(aruEVT_DOUBLE, aruDblEvent);
 class aruDblEvent: public wxCommandEvent
 {
 public:
@@ -21,11 +21,10 @@ public:
 private:
     double m_wert;
 };
-#define EVT_ARU_DOUBLE(id, func) wx__DECLARE_EVT1(aruEVT_DOUBLE, id, &func)
 /*ENDE aruDblEvent*/
 
 /*aruColourEvent*/
-wxDEFINE_EVENT(aruEVT_COLOUR, aruColourEvent);
+wxDECLARE_EVENT(aruEVT_COLOUR, aruColourEvent);
 class aruColourEvent: public wxCommandEvent
 {
 public:
@@ -37,7 +36,6 @@ public:
 private:
     wxColour m_wert;
 };
-#define EVT_ARU_COLOUR(func) wx__DECLARE_EVT0(aruEVT_COLOUR, &func)
 /*ENDE aruColourEvent*/
 
 #endif //__ARU_EVENTS_H

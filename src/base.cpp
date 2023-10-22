@@ -18,20 +18,26 @@ bool MainApp::OnInit()
 }
 
 
-BEGIN_EVENT_TABLE(MainFrame, wxFrame)
+/*BEGIN_EVENT_TABLE(MainFrame, wxFrame)
    EVT_MENU(ID_MAINWIN_QUIT, MainFrame::OnQuit)
    EVT_PAINT(MainFrame::OnPaint)
-   EVT_TIMER(ID_TIMER, MainFrame::OnTimer)
    EVT_MOUSEWHEEL(MainFrame::OnMouseWheel)
    EVT_MENU(ID_PE_DLG, MainFrame::EinstellungenOeffnen)
-   EVT_ARU_DOUBLE(wxID_ANY, MainFrame::OnAruDouble)
-   EVT_ARU_COLOUR(MainFrame::OnAruColour)
-END_EVENT_TABLE()
+   EVT_TIMER(ID_TIMER, MainFrame::OnTimer)
+END_EVENT_TABLE()*/
 
 MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size)
     : wxFrame((wxFrame *) NULL, -1, title, pos, size)
 {
-    wxMenu *FileMenu = new wxMenu;
+	Bind(aruEVT_DOUBLE, &MainFrame::OnAruDouble, this);
+	Bind(aruEVT_COLOUR, &MainFrame::OnAruColour, this);
+	Bind(wxEVT_MENU, &MainFrame::OnQuit, this, ID_MAINWIN_QUIT);
+	Bind(wxEVT_PAINT, &MainFrame::OnPaint, this);
+	Bind(wxEVT_MOUSEWHEEL, &MainFrame::OnMouseWheel, this);
+	Bind(wxEVT_MENU, &MainFrame::EinstellungenOeffnen, this, ID_PE_DLG);
+	Bind(wxEVT_TIMER, &MainFrame::OnTimer, this, ID_TIMER);
+	
+	wxMenu *FileMenu = new wxMenu;
     wxMenuBar *MenuBar = new wxMenuBar;
 
     FileMenu->Append(ID_MAINWIN_QUIT, _("&Quit"));
@@ -139,7 +145,11 @@ void MainFrame::EinstellungenOeffnen(wxCommandEvent& event)
 
 void MainFrame::OnAruDouble(aruDblEvent& event)
 {
-	SetStatusText (wxString::Format("Wert = %.2f; ID = %d", event.HoleWert(), event.GetId()), 0);
+	int tempID = event.GetId();
+    double Wert = event.HoleWert();
+	
+	SetStatusText (wxString::Format("Wert = %.2f; ID = %d", Wert, tempID), 0);
+	Refresh();
 	event.Skip();
 	return;
 }

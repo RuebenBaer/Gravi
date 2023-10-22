@@ -1,6 +1,8 @@
 #include "aru_events.h"
 
 /*Event für double Übergabe*/
+wxDEFINE_EVENT(aruEVT_DOUBLE, aruDblEvent);
+
 aruDblEvent::aruDblEvent(wxEventType commandType, int id):wxCommandEvent(commandType, id)
 {
 
@@ -28,6 +30,8 @@ void aruDblEvent::SetzeWert(const double wert)
 /*ENDE Event für double Übergabe*/
 
 /*Event für wxColour Übergabe*/
+wxDEFINE_EVENT(aruEVT_COLOUR, aruColourEvent);
+
 aruColourEvent::aruColourEvent(wxEventType commandType, int id):wxCommandEvent(commandType, id)
 {
 
