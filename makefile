@@ -45,7 +45,10 @@ BINDIR = bin
 BIN = $(BINDIR)\gravi.exe
 OBJ = \
 	$(OBJDIR)\base.o \
-	$(OBJDIR)\partikel.o
+	$(OBJDIR)\partikel.o \
+	$(OBJDIR)\PE_Dlg\ProgrammEinstellungenDlg.o \
+	$(OBJDIR)\Dbl_Eingabe\Dbl_Eingabe.o \
+	$(OBJDIR)\aru_events\aru_events.o
 
 .PHONEY: clean all
 
@@ -60,6 +63,18 @@ $(OBJDIR)\partikel.o: $(SRCDIR)\partikel.cpp $(SRCDIR)\partikel.h
 	if not exist $(OBJDIR) mkdir $(OBJDIR)
 	$(CXX) $(CPPFLAGS) $(DEFS) $(INCLUDES) -c $< -o $@
 
+$(OBJDIR)\PE_Dlg\ProgrammEinstellungenDlg.o: $(SRCDIR)\PE_Dlg\ProgrammEinstellungenDlg.cpp $(SRCDIR)\PE_Dlg\ProgrammEinstellungenDlg.h
+	if not exist $(OBJDIR)\PE_Dlg mkdir $(OBJDIR)\PE_Dlg
+	$(CXX) $(CPPFLAGS) $(DEFS) $(INCLUDES) -c $< -o $@
+
+$(OBJDIR)\Dbl_Eingabe\Dbl_Eingabe.o: $(SRCDIR)\Dbl_Eingabe\Dbl_Eingabe.cpp $(SRCDIR)\Dbl_Eingabe\Dbl_Eingabe.h
+	if not exist $(OBJDIR)\Dbl_Eingabe mkdir $(OBJDIR)\Dbl_Eingabe
+	$(CXX) $(CPPFLAGS) $(DEFS) $(INCLUDES) -c $< -o $@
+
+$(OBJDIR)\aru_events\aru_events.o: $(SRCDIR)\aru_events\aru_events.cpp $(SRCDIR)\aru_events\aru_events.h
+	if not exist $(OBJDIR)\aru_events mkdir $(OBJDIR)\aru_events
+	$(CXX) $(CPPFLAGS) $(DEFS) $(INCLUDES) -c $< -o $@
+
 clean:
-	del /q $(OBJDIR)
-	del /q $(BIN)
+	del /s /q $(OBJDIR)
+	del /s /q $(BIN)

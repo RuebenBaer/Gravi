@@ -23,6 +23,9 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
    EVT_PAINT(MainFrame::OnPaint)
    EVT_TIMER(ID_TIMER, MainFrame::OnTimer)
    EVT_MOUSEWHEEL(MainFrame::OnMouseWheel)
+   EVT_MENU(ID_PE_DLG, MainFrame::EinstellungenOeffnen)
+   EVT_ARU_DOUBLE(wxID_ANY, MainFrame::OnAruDouble)
+   EVT_ARU_COLOUR(MainFrame::OnAruColour)
 END_EVENT_TABLE()
 
 MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size)
@@ -32,6 +35,7 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
     wxMenuBar *MenuBar = new wxMenuBar;
 
     FileMenu->Append(ID_MAINWIN_QUIT, _("&Quit"));
+	FileMenu->Append(ID_PE_DLG, "Einstellungen");
 
     MenuBar->Append(FileMenu, _("&File"));
     SetMenuBar(MenuBar);	
@@ -43,6 +47,7 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 	m_skalierung = 1.0;
 	dc_Offset[0] = dc_Offset[1] = 200;
 	
+	peDlg = new Programm_Einstellungen_Dialog(this);
 	
 	srand (time(NULL));
 	for(int i = 0; i < anzPartikel; i++)
@@ -68,6 +73,8 @@ void MainFrame::OnQuit(wxCommandEvent & WXUNUSED(event))
 	{
 		delete part_lst[i];
 	}
+	
+	delete peDlg;
     Close(TRUE);
 }
 
@@ -122,4 +129,25 @@ void MainFrame::OnMouseWheel(wxMouseEvent& event)
     Refresh();
     event.Skip();
     return;
+}
+
+void MainFrame::EinstellungenOeffnen(wxCommandEvent& event)
+{
+	peDlg->ShowModal();
+	return;
+}
+
+void MainFrame::OnAruDouble(aruDblEvent& event)
+{
+	SetStatusText (wxString::Format("Wert = %.2f; ID = %d", event.HoleWert(), event.GetId()), 0);
+	event.Skip();
+	return;
+}
+
+void MainFrame::OnAruColour(aruColourEvent& event)
+{
+	SetStatusText(wxString::Format("Farbe = %d %d %d; ID = %d", event.HoleWert().Red(),
+					event.HoleWert().Green(), event.HoleWert().Blue(), event.GetId()), 0);
+	event.Skip();
+	return;
 }

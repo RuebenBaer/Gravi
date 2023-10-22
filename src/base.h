@@ -3,7 +3,9 @@
 
 #include "partikel.h"
 #include <stdlib.h>     /* srand, rand */
-#include <time.h> 
+#include <time.h>
+#include "aru_events\aru_events.h"
+#include "PE_Dlg\ProgrammEinstellungenDlg.h"
 
 class MainApp: public wxApp
 {
@@ -24,18 +26,25 @@ class MainFrame: public wxFrame
 		wxTimer timer;
 		int timerTick = 50;
 		
+		Programm_Einstellungen_Dialog* peDlg;
+		
 		double m_wertFkt, m_skalierung;
 		int dc_Offset[2];
 		
 		void OnPaint(wxPaintEvent& event);
 		void OnTimer(wxTimerEvent& event);
 		void OnMouseWheel(wxMouseEvent& event);
+		
+		void OnAruDouble(aruDblEvent& event);
+		void OnAruColour(aruColourEvent& event);
+		
+		void EinstellungenOeffnen(wxCommandEvent& event);
 		DECLARE_EVENT_TABLE()
 };
 
 enum
 {
-   ID_MAINWIN_QUIT = wxID_HIGHEST+1, ID_TIMER
+   ID_MAINWIN_QUIT = wxID_HIGHEST+1, ID_TIMER, ID_PE_DLG
 };
 
 
