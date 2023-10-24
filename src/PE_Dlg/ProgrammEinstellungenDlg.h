@@ -13,6 +13,7 @@
 
 class Programm_Einstellungen_Dialog: public wxDialog
 {
+	/*Parameter: gravKonst, timerTick, farbePartikel*/
     public:
 		enum programmEinstellungID{
 			IDwert1=2000,
