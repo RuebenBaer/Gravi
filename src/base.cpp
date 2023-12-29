@@ -32,6 +32,7 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 	Bind(aruEVT_DOUBLE, &MainFrame::OnAruDouble, this);
 	Bind(aruEVT_COLOUR, &MainFrame::OnAruColour, this);
 	Bind(wxEVT_MENU, &MainFrame::OnQuit, this, ID_MAINWIN_QUIT);
+	Bind(wxEVT_MENU, &MainFrame::OnTimerStart, this, ID_TIMER_START);
 	Bind(wxEVT_PAINT, &MainFrame::OnPaint, this);
 	Bind(wxEVT_MOUSEWHEEL, &MainFrame::OnMouseWheel, this);
 	Bind(wxEVT_MENU, &MainFrame::EinstellungenOeffnen, this, ID_PE_DLG);
@@ -41,6 +42,7 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
     wxMenuBar *MenuBar = new wxMenuBar;
 
     FileMenu->Append(ID_MAINWIN_QUIT, _("&Quit"));
+	FileMenu->Append(ID_TIMER_START, "Starte Timer");
 	FileMenu->Append(ID_PE_DLG, "Einstellungen");
 
     MenuBar->Append(FileMenu, _("&File"));
@@ -59,15 +61,15 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 	for(int i = 0; i < anzPartikel; i++)
 	{
 		part_lst[i] = new partikel;
-		part_lst[i]->ort[0] = 200 + (double)(rand() % 2500) / 100.0;
-		part_lst[i]->ort[1] = 200 + (double)(rand() % 2500) / 100.0;
+		part_lst[i]->ort[0] = 200 + (double)(rand() % 2500) / 50.0;
+		part_lst[i]->ort[1] = 200 + (double)(rand() % 2500) / 50.0;
 		part_lst[i]->masse = (double)(rand() % 10) + 1.0;
 		part_lst[i]->radius = part_lst[i]->masse / 5;
 		part_lst[i]->ort[2] = 0.0;
 	}
 	
 	timer.SetOwner(this, ID_TIMER);
-	timer.Start(timerTick);
+	//timer.Start(timerTick);
 	
 	Maximize(true);
 }
@@ -84,15 +86,28 @@ void MainFrame::OnQuit(wxCommandEvent & WXUNUSED(event))
     Close(TRUE);
 }
 
+void MainFrame::OnTimerStart(wxCommandEvent& event)
+{
+	if(timer.IsRunning())
+	{
+		timer.Stop();
+		return;
+	}
+	timer.Start(timerTick);
+	return;
+}
+
 void MainFrame::OnPaint(wxPaintEvent &event)
 {
 	wxPaintDC dc(this);
 	dc.SetPen(wxPen(wxColor(0, 0, 0)));
 	for(int i = 0; i < anzPartikel; i++)
 	{
+		int malRadius = part_lst[i]->radius * m_skalierung;
+		if(malRadius < 1)malRadius = 1;
 		dc.DrawCircle((part_lst[i]->ort[0] + dc_Offset[0]) * m_skalierung,
 						(part_lst[i]->ort[1] + dc_Offset[1]) * m_skalierung,
-						part_lst[i]->radius * m_skalierung);
+						malRadius);
 	}
 	return;
 }

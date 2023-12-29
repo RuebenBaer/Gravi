@@ -20,8 +20,8 @@ class MainFrame: public wxFrame
 		void OnQuit(wxCommandEvent &event);
 		
 	private:
-		partikel *part_lst[3];
-		int anzPartikel = 3;
+		partikel *part_lst[100];
+		int anzPartikel = 100;
 		double gravKonst = 1.0;
 		wxTimer timer;
 		int timerTick = 50;
@@ -33,6 +33,7 @@ class MainFrame: public wxFrame
 		
 		void OnPaint(wxPaintEvent& event);
 		void OnTimer(wxTimerEvent& event);
+		void OnTimerStart(wxCommandEvent& event);
 		void OnMouseWheel(wxMouseEvent& event);
 		
 		void OnAruDouble(aruDblEvent& event);
@@ -44,7 +45,7 @@ class MainFrame: public wxFrame
 
 enum
 {
-   ID_MAINWIN_QUIT = wxID_HIGHEST+1, ID_TIMER, ID_PE_DLG
+   ID_MAINWIN_QUIT = wxID_HIGHEST+1, ID_TIMER, ID_TIMER_START, ID_PE_DLG
 };
 
 

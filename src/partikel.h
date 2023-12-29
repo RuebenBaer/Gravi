@@ -8,7 +8,9 @@ struct partikel{
 	double ort[3] = {0.0, 0.0, 0.0};
 	double kraft[3] = {0.0, 0.0, 0.0};
 	double geschwindigkeit[3] = {0.0, 0.0, 0.0};
+	double deltaGeschw[3] = {0.0, 0.0, 0.0};
 	double radius = 1.0;
+	double EModul = 1000.0;
 };
 
 void Wechselwirkung(partikel &p1, partikel &p2, double graviKonst);

@@ -31,7 +31,7 @@ void Bewegen(double deltaT, partikel &p)
 {
 	for(int i = 0; i < 3; i++)
 	{
-		p.geschwindigkeit[i] += deltaT * p.kraft[i] / p.masse;
+		p.geschwindigkeit[i] += deltaT * p.kraft[i] / p.masse + p.deltaGeschw[i];
 		p.ort[i] += p.geschwindigkeit[i] * deltaT;
 	}
 	Nullen(p);
@@ -41,29 +41,38 @@ void Bewegen(double deltaT, partikel &p)
 void Nullen(partikel &p)
 {
 	p.kraft[0] = p.kraft[1] = p.kraft[2] = 0.0;
+	p.deltaGeschw[0] = p.deltaGeschw[1] = p.deltaGeschw[2] = 0.0; 
 	return;
 }
 
 void Aufprall(partikel &p1, partikel &p2)
 {
-	return;
-	double EModul = 1000.0;
-	
+	//return;
 	double abstand = 0.0;
 	for(int i = 0; i < 3; i++)
 	{
 		abstand += (p1.ort[i] - p2.ort[i]) * (p1.ort[i] - p2.ort[i]);
 	}
 	abstand = sqrt(abstand);
-	double delta1 = 1.0 - (abstand - p2.radius) / p1.radius;
-	double delta2 = 1.0 - (abstand - p1.radius) / p2.radius;
 	
-	if(!abstand)return;
+	double richtung[3];
 	for(int i = 0; i < 3; i++)
 	{
-		p1.kraft[i] += (p1.ort[i]-p2.ort[i]) * delta1 * EModul / abstand;
-		p2.kraft[i] += (p2.ort[i]-p1.ort[i]) * delta2 * EModul / abstand;
+		richtung[i] = (p1.ort[i] - p2.ort[i]) / abstand;
 	}
-	
+
+	double lambda1 = 0.0;
+	double lambda2 = 0.0;
+	for(int i = 0; i < 3; i++)
+	{
+		lambda1 += richtung[i] * p1.geschwindigkeit[i];
+		lambda2 += richtung[i] * p2.geschwindigkeit[i];
+	}
+	for(int i = 0; i < 3; i++)
+	{
+		p1.deltaGeschw[i] -= 2 * (lambda1 - lambda2) * richtung[i] * p2.masse / (p1.masse + p2.masse);
+		p2.deltaGeschw[i] -= 2 * (lambda2 - lambda1) * richtung[i] * p1.masse / (p1.masse + p2.masse);
+	}
+
 	return;
 }
