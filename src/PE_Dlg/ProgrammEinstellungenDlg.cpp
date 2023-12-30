@@ -32,19 +32,19 @@ Programm_Einstellungen_Dialog::Programm_Einstellungen_Dialog(wxWindow* parent):w
     steuerungsSizer->Add(new wxTextCtrl(this, -1, wxT("Programmparameter und -einstellungen"), wxDefaultPosition, wxDefaultSize, wxTE_READONLY|wxBORDER_NONE),0, wxEXPAND|wxALL, 5);
 
 	/*Anwendungsspezifische Felder*/
-    wxBoxSizer *wert1Sizer = new wxBoxSizer(wxHORIZONTAL);
-    wert1Sizer->Add(new wxTextCtrl(this, -1, wxT("Wert 1"), wxDefaultPosition, wxSize(180, 20), wxTE_READONLY|wxBORDER_NONE|wxTE_BESTWRAP),0, wxEXPAND|wxALL, 5);
-    aruDblTxtCtrl *wert1Ctrl = new aruDblTxtCtrl(this, IDwert1, wxString::Format(wxT("%.2f"), pe_wert1), wxDefaultPosition, wxSize(50, 20),
-                                                         wxTE_PROCESS_ENTER|wxTE_RIGHT|wxBORDER_SIMPLE|wxTE_NOHIDESEL, wxDefaultValidator, wxT("wert1Ctrl"));
-    wert1Sizer->Add(wert1Ctrl, 0, wxALL, 5);
-    steuerungsSizer->Add(wert1Sizer, 1, wxEXPAND, 5);
+    wxBoxSizer *wGraviKonstSizer = new wxBoxSizer(wxHORIZONTAL);
+    wGraviKonstSizer->Add(new wxTextCtrl(this, -1, wxT("Gravitationskonstante"), wxDefaultPosition, wxSize(180, 20), wxTE_READONLY|wxBORDER_NONE|wxTE_BESTWRAP),0, wxEXPAND|wxALL, 5);
+    aruDblTxtCtrl *wGraviKonstCtrl = new aruDblTxtCtrl(this, IDwGraviKonst, wxString::Format(wxT("%.2f"), pe_wGraviKonst), wxDefaultPosition, wxSize(50, 20),
+                                                         wxTE_PROCESS_ENTER|wxTE_RIGHT|wxBORDER_SIMPLE|wxTE_NOHIDESEL, wxDefaultValidator, wxT("wGraviKonstCtrl"));
+    wGraviKonstSizer->Add(wGraviKonstCtrl, 0, wxALL, 5);
+    steuerungsSizer->Add(wGraviKonstSizer, 1, wxEXPAND, 5);
 
-    wxBoxSizer *wert2Sizer = new wxBoxSizer(wxHORIZONTAL);
-    wert2Sizer->Add(new wxTextCtrl(this, -1, wxT("Wert 2"), wxDefaultPosition, wxSize(180, 20), wxTE_READONLY|wxBORDER_NONE|wxTE_BESTWRAP),0, wxEXPAND|wxALL, 5);
-    aruDblTxtCtrl *wert2Ctrl = new aruDblTxtCtrl(this, IDwert2, wxString::Format(wxT("%.2f"), pe_wert2), wxDefaultPosition, wxSize(50, 20),
-                                                         wxTE_PROCESS_ENTER|wxTE_RIGHT|wxBORDER_SIMPLE|wxTE_NOHIDESEL, wxDefaultValidator, wxT("wert2Ctrl"));
-    wert2Sizer->Add(wert2Ctrl, 0, wxALL, 5);
-    steuerungsSizer->Add(wert2Sizer, 1, wxEXPAND, 5);
+    wxBoxSizer *wTimerTickSizer = new wxBoxSizer(wxHORIZONTAL);
+    wTimerTickSizer->Add(new wxTextCtrl(this, -1, wxT("Timertick [ms]"), wxDefaultPosition, wxSize(180, 20), wxTE_READONLY|wxBORDER_NONE|wxTE_BESTWRAP),0, wxEXPAND|wxALL, 5);
+    aruDblTxtCtrl *wTimerTickCtrl = new aruDblTxtCtrl(this, IDwTimerTick, wxString::Format(wxT("%.2f"), pe_wTimerTick), wxDefaultPosition, wxSize(50, 20),
+                                                         wxTE_PROCESS_ENTER|wxTE_RIGHT|wxBORDER_SIMPLE|wxTE_NOHIDESEL, wxDefaultValidator, wxT("wTimerTickCtrl"));
+    wTimerTickSizer->Add(wTimerTickCtrl, 0, wxALL, 5);
+    steuerungsSizer->Add(wTimerTickSizer, 1, wxEXPAND, 5);
     /*ENDE Programmsteuerung*/
 
     /*Farben*/
@@ -94,8 +94,8 @@ void Programm_Einstellungen_Dialog::OnClose(wxCloseEvent &event)
 void Programm_Einstellungen_Dialog::PEDialogIni(void)
 {
     /*Standardwerte setzen*/
-    pe_wert1 = 0.01;	//Beschreibung Wert 1
-    pe_wert2 = 1.0;		//Beschreibung Wert 2
+    pe_wGraviKonst = 0.01;	//Beschreibung Wert 1
+    pe_wTimerTick = 1.0;		//Beschreibung Wert 2
 
     pe_farbe1 = wxColour(0, 0, 0);			//Beschreibung Farbe 1
     pe_farbe2 = wxColour(74, 186, 240);	//Beschreibung Farbe 2
@@ -108,16 +108,16 @@ void Programm_Einstellungen_Dialog::PEDialogIni(void)
 		while(!PE_Parameter_Ini_Datei.eof())
 		{
 			PE_Parameter_Ini_Datei.getline(Zeile,50,':');
-			if(!strcmp(Zeile,"wert1"))
+			if(!strcmp(Zeile,"wGraviKonst"))
 			{
 				PE_Parameter_Ini_Datei.getline(Zeile,50);
-				pe_wert1 = atof(Zeile);
+				pe_wGraviKonst = atof(Zeile);
 				continue;
 			}
-			if(!strcmp(Zeile,"wert2"))
+			if(!strcmp(Zeile,"wTimerTick"))
 			{
 				PE_Parameter_Ini_Datei.getline(Zeile,50);
-				pe_wert2 = atof(Zeile);
+				pe_wTimerTick = atof(Zeile);
 				continue;
 			}
             if(!strcmp(Zeile,"farbe1"))
@@ -167,11 +167,11 @@ void Programm_Einstellungen_Dialog::OnTextChange(wxCommandEvent &event)
     double uebergabe = -1;
     switch(textFeldID)
     {
-    case IDwert1:
-        uebergabe = pe_wert1 = atof(inhalt);
+    case IDwGraviKonst:
+        uebergabe = pe_wGraviKonst = atof(inhalt);
         break;
-    case IDwert2:
-        uebergabe = pe_wert2 = atof(inhalt);
+    case IDwTimerTick:
+        uebergabe = pe_wTimerTick = atof(inhalt);
         break;
     default:
         return;
@@ -236,8 +236,8 @@ void Programm_Einstellungen_Dialog::IniSpeichern(void)
     std::ofstream Neue_Ini_Datei("Programmeinstellungen.ini", std::ios::out|std::ios_base::trunc);
     if(Neue_Ini_Datei.good())
     {
-        Neue_Ini_Datei<<"wert1:"<<pe_wert1<<"\n";
-        Neue_Ini_Datei<<"wert2:"<<pe_wert2<<"\n";
+        Neue_Ini_Datei<<"wGraviKonst:"<<pe_wGraviKonst<<"\n";
+        Neue_Ini_Datei<<"wTimerTick:"<<pe_wTimerTick<<"\n";
         Neue_Ini_Datei<<"farbe1:"<<(int)pe_farbe1.Red()<<","<<(int)pe_farbe1.Green()<<","<<(int)pe_farbe1.Blue()<<"\n";
         Neue_Ini_Datei<<"farbe2:"<<(int)pe_farbe2.Red()<<","<<(int)pe_farbe2.Green()<<","<<(int)pe_farbe2.Blue()<<"\n";
         Neue_Ini_Datei.close();
@@ -249,10 +249,10 @@ double Programm_Einstellungen_Dialog::HoleWert(programmEinstellungID retID) cons
 {
     switch (retID)
     {
-    case IDwert1:
-        return pe_wert1;
-    case IDwert2:
-        return pe_wert2;
+    case IDwGraviKonst:
+        return pe_wGraviKonst;
+    case IDwTimerTick:
+        return pe_wTimerTick;
 	default:
         break;
     }

@@ -16,8 +16,8 @@ class Programm_Einstellungen_Dialog: public wxDialog
 	/*Parameter: gravKonst, timerTick, farbePartikel*/
     public:
 		enum programmEinstellungID{
-			IDwert1=2000,
-			IDwert2, IDfarbe1, IDfarbe2
+			IDwGraviKonst=2000,
+			IDwTimerTick, IDfarbe1, IDfarbe2
 		};
 		
         Programm_Einstellungen_Dialog(wxWindow* parent);
@@ -28,7 +28,7 @@ class Programm_Einstellungen_Dialog: public wxDialog
     private:
         wxWindow* m_mama;
         /*Parameter*/
-        double pe_wert1, pe_wert2;
+        double pe_wGraviKonst, pe_wTimerTick;
         wxColour pe_farbe1, pe_farbe2;
 
         void PEDialogIni(void);

@@ -17,15 +17,6 @@ bool MainApp::OnInit()
    return TRUE;
 }
 
-
-/*BEGIN_EVENT_TABLE(MainFrame, wxFrame)
-   EVT_MENU(ID_MAINWIN_QUIT, MainFrame::OnQuit)
-   EVT_PAINT(MainFrame::OnPaint)
-   EVT_MOUSEWHEEL(MainFrame::OnMouseWheel)
-   EVT_MENU(ID_PE_DLG, MainFrame::EinstellungenOeffnen)
-   EVT_TIMER(ID_TIMER, MainFrame::OnTimer)
-END_EVENT_TABLE()*/
-
 MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size)
     : wxFrame((wxFrame *) NULL, -1, title, pos, size)
 {
@@ -161,9 +152,21 @@ void MainFrame::EinstellungenOeffnen(wxCommandEvent& event)
 void MainFrame::OnAruDouble(aruDblEvent& event)
 {
 	int tempID = event.GetId();
-    double Wert = event.HoleWert();
-	
-	SetStatusText (wxString::Format("Wert = %.2f; ID = %d", Wert, tempID), 0);
+	switch(tempID)
+	{
+		case Programm_Einstellungen_Dialog::IDwGraviKonst:
+			gravKonst = event.HoleWert();
+			break;
+		case Programm_Einstellungen_Dialog::IDwTimerTick:
+			timerTick = event.HoleWert();
+			if(timer.IsRunning())
+			{
+				timer.Stop();
+				timer.Start(timerTick);
+			}
+			break;
+	}
+
 	Refresh();
 	event.Skip();
 	return;
