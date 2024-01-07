@@ -17,24 +17,30 @@ class MainFrame: public wxFrame
 {
 	public:
 		MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
+		~MainFrame();
 		void OnQuit(wxCommandEvent &event);
 		
 	private:
-		partikel *part_lst[100];
-		int anzPartikel = 100;
+		partikel *part_lst[10];
+		int anzPartikel = 10;
 		double gravKonst = 1.0;
 		wxTimer timer;
 		int timerTick = 50;
 		
+		wxPoint alteMousePosition;
+		
 		Programm_Einstellungen_Dialog* peDlg;
 		
 		double m_wertFkt, m_skalierung;
-		int dc_Offset[2];
+		double dc_Offset[2];
 		
 		void OnPaint(wxPaintEvent& event);
+		void OnPaintIdle(wxPaintEvent& event);
 		void OnTimer(wxTimerEvent& event);
 		void OnTimerStart(wxCommandEvent& event);
 		void OnMouseWheel(wxMouseEvent& event);
+		void OnMouseMove(wxMouseEvent& event);
+		void OnLeftClick(wxMouseEvent& event);
 		
 		void OnAruDouble(aruDblEvent& event);
 		void OnAruColour(aruColourEvent& event);

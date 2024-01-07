@@ -24,8 +24,10 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 	Bind(aruEVT_COLOUR, &MainFrame::OnAruColour, this);
 	Bind(wxEVT_MENU, &MainFrame::OnQuit, this, ID_MAINWIN_QUIT);
 	Bind(wxEVT_MENU, &MainFrame::OnTimerStart, this, ID_TIMER_START);
-	Bind(wxEVT_PAINT, &MainFrame::OnPaint, this);
+	Bind(wxEVT_PAINT, &MainFrame::OnPaintIdle, this);
 	Bind(wxEVT_MOUSEWHEEL, &MainFrame::OnMouseWheel, this);
+	Bind(wxEVT_MOTION, &MainFrame::OnMouseMove, this);
+	Bind(wxEVT_LEFT_DOWN, MainFrame::OnLeftClick, this);
 	Bind(wxEVT_MENU, &MainFrame::EinstellungenOeffnen, this, ID_PE_DLG);
 	Bind(wxEVT_TIMER, &MainFrame::OnTimer, this, ID_TIMER);
 	
@@ -52,11 +54,11 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 	for(int i = 0; i < anzPartikel; i++)
 	{
 		part_lst[i] = new partikel;
-		part_lst[i]->ort[0] = 200 + (double)(rand() % 2500) / 50.0;
-		part_lst[i]->ort[1] = 200 + (double)(rand() % 2500) / 50.0;
+		part_lst[i]->ort[0] = 200 + (double)(rand() % 2500) / 10.0;
+		part_lst[i]->ort[1] = 200 + (double)(rand() % 2500) / 10.0;
+		part_lst[i]->ort[2] = 200 + (double)(rand() % 2500) / 10.0;
 		part_lst[i]->masse = (double)(rand() % 10) + 1.0;
 		part_lst[i]->radius = part_lst[i]->masse / 5;
-		part_lst[i]->ort[2] = 0.0;
 	}
 	
 	timer.SetOwner(this, ID_TIMER);
@@ -65,14 +67,18 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 	Maximize(true);
 }
 
-void MainFrame::OnQuit(wxCommandEvent & WXUNUSED(event))
+MainFrame::~MainFrame()
 {
-	timer.Stop();
 	for(int i = 0; i < anzPartikel; i++)
 	{
 		delete part_lst[i];
 	}
-	
+}
+
+void MainFrame::OnQuit(wxCommandEvent & WXUNUSED(event))
+{
+	timer.Stop();
+
 	delete peDlg;
     Close(TRUE);
 }
@@ -81,10 +87,16 @@ void MainFrame::OnTimerStart(wxCommandEvent& event)
 {
 	if(timer.IsRunning())
 	{
+		Unbind(wxEVT_PAINT, &MainFrame::OnPaint, this);
+		Bind(wxEVT_PAINT, &MainFrame::OnPaintIdle, this);
 		timer.Stop();
+		Refresh();
 		return;
 	}
 	timer.Start(timerTick);
+	Unbind(wxEVT_PAINT, &MainFrame::OnPaintIdle, this);
+	Bind(wxEVT_PAINT, &MainFrame::OnPaint, this);
+	
 	return;
 }
 
@@ -100,6 +112,22 @@ void MainFrame::OnPaint(wxPaintEvent &event)
 						(part_lst[i]->ort[1] + dc_Offset[1]) * m_skalierung,
 						malRadius);
 	}
+	return;
+}
+
+void MainFrame::OnPaintIdle(wxPaintEvent& event)
+{
+	wxPaintDC dc(this);
+	dc.SetPen(wxPen(wxColor(0, 0, 0)));
+	for(int i = 0; i < anzPartikel; i++)
+	{
+		int malRadius = part_lst[i]->radius * m_skalierung;
+		if(malRadius < 1)malRadius = 1;
+		dc.DrawCircle((part_lst[i]->ort[0] + dc_Offset[0]) * m_skalierung,
+						(part_lst[i]->ort[1] + dc_Offset[1]) * m_skalierung,
+						malRadius);
+	}
+	dc.DrawText("PAUSE", dc.GetSize().GetWidth() / 2, dc.GetSize().GetHeight() / 2);
 	return;
 }
 
@@ -136,10 +164,36 @@ void MainFrame::OnMouseWheel(wxMouseEvent& event)
 
 	dc_Offset[0] -= MousePosition.x * ((1/alteSkalierung)-(1/m_skalierung));
 	dc_Offset[1] -= MousePosition.y * ((1/alteSkalierung)-(1/m_skalierung));
-	SetStatusText(wxString::Format("Offset: %d - %d / Skalierung: %5.5f", dc_Offset[0], dc_Offset[1], m_skalierung), 1);
+	SetStatusText(wxString::Format("Offset: %.0f - %.0f / Skalierung: %5.5f", dc_Offset[0], dc_Offset[1], m_skalierung), 1);
 
     Refresh();
     event.Skip();
+    return;
+}
+
+void MainFrame::OnMouseMove(wxMouseEvent& event)
+{
+	if(event.Dragging())
+	{
+		wxClientDC dc(this);
+		wxPoint MousePosition = event.GetLogicalPosition(dc);
+		dc_Offset[0] += ((MousePosition.x - alteMousePosition.x) / m_skalierung);
+		dc_Offset[1] += ((MousePosition.y - alteMousePosition.y) / m_skalierung);
+		alteMousePosition = MousePosition;
+		if(!timer.IsRunning())
+		{
+			Refresh();
+		}
+	}
+    event.Skip();
+    return;
+}
+
+void MainFrame::OnLeftClick(wxMouseEvent& event)
+{
+	wxClientDC dc(this);
+	alteMousePosition = event.GetLogicalPosition(dc);
+	event.Skip();
     return;
 }
 

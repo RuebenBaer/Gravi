@@ -21,7 +21,7 @@ void Wechselwirkung(partikel &p1, partikel &p2, double graviKonst)
 	}
 	for(int i = 0; i < 3; i++)
 	{
-		p1.kraft[i] += (p2.ort[i] - p1.ort[i]) * p1.masse * p2.masse * graviKonst / pow(entfernungsFkt, 3.0);
+		p1.kraft[i] += (p2.ort[i] - p1.ort[i]) * p1.masse * p2.masse * graviKonst / pow(entfernungsFkt, 2.0);
 		p2.kraft[i] -= p1.kraft[i];
 	}
 	return;
@@ -68,10 +68,12 @@ void Aufprall(partikel &p1, partikel &p2)
 		lambda1 += richtung[i] * p1.geschwindigkeit[i];
 		lambda2 += richtung[i] * p2.geschwindigkeit[i];
 	}
+	if(lambda1 > 0)lambda1 = 0;
+	if(lambda2 < 0)lambda2 = 0;
 	for(int i = 0; i < 3; i++)
 	{
-		p1.deltaGeschw[i] -= 2 * (lambda1 - lambda2) * richtung[i] * p2.masse / (p1.masse + p2.masse);
-		p2.deltaGeschw[i] -= 2 * (lambda2 - lambda1) * richtung[i] * p1.masse / (p1.masse + p2.masse);
+		p1.deltaGeschw[i] -= 1.999 * (lambda1 - lambda2) * richtung[i] * p2.masse / (p1.masse + p2.masse);
+		p2.deltaGeschw[i] -= 1.999 * (lambda2 - lambda1) * richtung[i] * p1.masse / (p1.masse + p2.masse);
 	}
 
 	return;
