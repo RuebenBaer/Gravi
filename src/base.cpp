@@ -58,7 +58,7 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 		part_lst[i]->ort[1] = 200 + (double)(rand() % 2500) / 10.0;
 		part_lst[i]->ort[2] = 200 + (double)(rand() % 2500) / 10.0;
 		part_lst[i]->masse = (double)(rand() % 10) + 1.0;
-		part_lst[i]->radius = part_lst[i]->masse / 5;
+		part_lst[i]->radius = part_lst[i]->masse; // 5;
 	}
 	
 	timer.SetOwner(this, ID_TIMER);
