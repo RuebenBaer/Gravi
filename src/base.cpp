@@ -30,13 +30,18 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 	Bind(wxEVT_LEFT_DOWN, MainFrame::OnLeftClick, this);
 	Bind(wxEVT_MENU, &MainFrame::EinstellungenOeffnen, this, ID_PE_DLG);
 	Bind(wxEVT_TIMER, &MainFrame::OnTimer, this, ID_TIMER);
+	Bind(wxEVT_KEY_DOWN, &MainFrame::OnKeyDown, this);
+	Bind(wxEVT_KEY_UP, &MainFrame::OnKeyUp, this);
 	
 	wxMenu *FileMenu = new wxMenu;
     wxMenuBar *MenuBar = new wxMenuBar;
 
     FileMenu->Append(ID_MAINWIN_QUIT, _("&Quit"));
-	FileMenu->Append(ID_TIMER_START, "Starte Timer");
+	m_menuTimer = new wxMenuItem(FileMenu, ID_TIMER_START, "Starte Timer");
+	FileMenu->Append(m_menuTimer);
 	FileMenu->Append(ID_PE_DLG, "Einstellungen");
+	m_menuAnsicht = new wxMenuItem(FileMenu, ID_ANSICHT, "3D Kamera");
+	FileMenu->Append(m_menuAnsicht);
 
     MenuBar->Append(FileMenu, _("&File"));
     SetMenuBar(MenuBar);	
@@ -56,13 +61,16 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 		part_lst[i] = new partikel;
 		part_lst[i]->ort[0] = 200 + (double)(rand() % 2500) / 10.0;
 		part_lst[i]->ort[1] = 200 + (double)(rand() % 2500) / 10.0;
-		part_lst[i]->ort[2] = 200 + (double)(rand() % 2500) / 10.0;
+		part_lst[i]->ort[2] = (double)(rand() % 2500) / 10.0;
 		part_lst[i]->masse = (double)(rand() % 10) + 1.0;
 		part_lst[i]->radius = part_lst[i]->masse; // 5;
 	}
 	
 	timer.SetOwner(this, ID_TIMER);
 	//timer.Start(timerTick);
+	
+	Vektor kStart(325, 325, 425);
+	m_auge = new Kamera(kStart, -90, 0, 50, 10);
 	
 	Maximize(true);
 }
@@ -87,15 +95,23 @@ void MainFrame::OnTimerStart(wxCommandEvent& event)
 {
 	if(timer.IsRunning())
 	{
-		Unbind(wxEVT_PAINT, &MainFrame::OnPaint, this);
+		m_menuTimer->SetItemLabel("Starte Timer");
+		Unbind(wxEVT_PAINT, &MainFrame::OnPaint3D, this);
 		Bind(wxEVT_PAINT, &MainFrame::OnPaintIdle, this);
 		timer.Stop();
 		Refresh();
 		return;
 	}
 	timer.Start(timerTick);
+	m_menuTimer->SetItemLabel("Timer anhalten");
 	Unbind(wxEVT_PAINT, &MainFrame::OnPaintIdle, this);
-	Bind(wxEVT_PAINT, &MainFrame::OnPaint, this);
+	Bind(wxEVT_PAINT, &MainFrame::OnPaint3D, this);
+	
+	return;
+}
+
+void MainFrame::OnAnsichtWechsel(wxCommandEvent& event)
+{
 	
 	return;
 }
@@ -112,6 +128,52 @@ void MainFrame::OnPaint(wxPaintEvent &event)
 						(part_lst[i]->ort[1] + dc_Offset[1]) * m_skalierung,
 						malRadius);
 	}
+	return;
+}
+
+void MainFrame::OnPaint3D(wxPaintEvent &event)
+{
+	wxPaintDC dc(this);
+	dc.SetPen(wxPen(wxColor(0, 0, 0)));
+	if(m_auge == NULL)
+	{
+		dc.DrawText("Keine Kamera\nvorhanden", dc.GetSize().GetWidth() / 2, dc.GetSize().GetHeight() / 2);
+	}
+	
+	Vektor tempOrt;
+	Vektor Ansicht, KameraStandpunkt;
+	double entfernung, msEntfernung;
+	
+	KameraStandpunkt = m_auge->HoleOrt();
+	msEntfernung = m_auge->HoleAbstand();
+	for(int i = 0; i < anzPartikel; i++)
+	{
+		tempOrt = Vektor(part_lst[i]->ort);
+		Ansicht = m_auge->Aufnahme(tempOrt);
+		entfernung = (KameraStandpunkt - tempOrt).Laenge();
+		
+		int malRadius = part_lst[i]->radius * msEntfernung / entfernung;
+		if(malRadius < 1)malRadius = 1;
+		dc.DrawCircle((Ansicht.x() + dc_Offset[0] - 200),
+						(Ansicht.y() + dc_Offset[1]),
+						malRadius);
+	}
+	m_auge->Verschieben(-50, 0, 0);
+	KameraStandpunkt = m_auge->HoleOrt();
+	msEntfernung = m_auge->HoleAbstand();
+	for(int i = 0; i < anzPartikel; i++)
+	{
+		tempOrt = Vektor(part_lst[i]->ort);
+		Ansicht = m_auge->Aufnahme(tempOrt);
+		entfernung = (KameraStandpunkt - tempOrt).Laenge();
+		
+		int malRadius = part_lst[i]->radius * msEntfernung / entfernung;
+		if(malRadius < 1)malRadius = 1;
+		dc.DrawCircle((Ansicht.x() + dc_Offset[0] + 200),
+						(Ansicht.y() + dc_Offset[1]),
+						malRadius);
+	}
+	m_auge->Verschieben(50, 0, 0);
 	return;
 }
 
@@ -150,21 +212,37 @@ void MainFrame::OnTimer(wxTimerEvent& event)
 void MainFrame::OnMouseWheel(wxMouseEvent& event)
 {
     wxClientDC dc(this);
-    wxPoint MousePosition = event.GetLogicalPosition(dc);
-    double alteSkalierung = m_skalierung;
+    //wxPoint MousePosition = event.GetLogicalPosition(dc);
+    //double alteSkalierung = m_skalierung;
+	
+	m_wertFkt = 1;
+	if(m_shift)m_wertFkt = 10;
     
 	if(event.GetWheelRotation() < 0)
 	{
-		m_skalierung = m_skalierung / (1 + 0.1 * m_wertFkt);
+		if(m_ctrl)
+		{
+			m_auge->InkrAbstand(1.0 * m_wertFkt);
+		}else{
+			m_auge->Verschieben(0, 0, 1.0 * m_wertFkt);
+		}
+		//m_skalierung = m_skalierung / (1 + 0.1 * m_wertFkt);
 	}
 	if(event.GetWheelRotation() > 0)
 	{
-		m_skalierung = m_skalierung * (1 + 0.1 * m_wertFkt);
+		if(m_ctrl)
+		{
+			m_auge->InkrAbstand(-1.0 * m_wertFkt);
+		}else{
+			m_auge->Verschieben(0, 0, -1.0 * m_wertFkt);
+		}
+		//m_skalierung = m_skalierung * (1 + 0.1 * m_wertFkt);
 	}
 
-	dc_Offset[0] -= MousePosition.x * ((1/alteSkalierung)-(1/m_skalierung));
-	dc_Offset[1] -= MousePosition.y * ((1/alteSkalierung)-(1/m_skalierung));
-	SetStatusText(wxString::Format("Offset: %.0f - %.0f / Skalierung: %5.5f", dc_Offset[0], dc_Offset[1], m_skalierung), 1);
+	//dc_Offset[0] -= MousePosition.x * ((1/alteSkalierung)-(1/m_skalierung));
+	//dc_Offset[1] -= MousePosition.y * ((1/alteSkalierung)-(1/m_skalierung));
+	//SetStatusText(wxString::Format("Offset: %.0f - %.0f / Skalierung: %5.5f", dc_Offset[0], dc_Offset[1], m_skalierung), 1);
+	SetStatusText(wxString::Format("Kamera: %.5f / Mattscheibe: %.5f", m_auge->HoleOrt().z(), m_auge->HoleAbstand()), 1);
 
     Refresh();
     event.Skip();
@@ -232,4 +310,28 @@ void MainFrame::OnAruColour(aruColourEvent& event)
 					event.HoleWert().Green(), event.HoleWert().Blue(), event.GetId()), 0);
 	event.Skip();
 	return;
+}
+
+void MainFrame::OnKeyDown(wxKeyEvent& event)
+{
+	if(event.GetKeyCode() == WXK_SHIFT)
+	{
+		m_shift = true;
+	}
+	if(event.GetKeyCode() == WXK_CONTROL)
+	{
+		m_ctrl = true;
+	}
+}
+
+void MainFrame::OnKeyUp(wxKeyEvent& event)
+{
+	if(event.GetKeyCode() == WXK_SHIFT)
+	{
+		m_shift = false;
+	}
+	if(event.GetKeyCode() == WXK_CONTROL)
+	{
+		m_ctrl = false;
+	}
 }

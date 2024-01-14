@@ -48,7 +48,9 @@ OBJ = \
 	$(OBJDIR)\partikel.o \
 	$(OBJDIR)\PE_Dlg\ProgrammEinstellungenDlg.o \
 	$(OBJDIR)\Dbl_Eingabe\Dbl_Eingabe.o \
-	$(OBJDIR)\aru_events\aru_events.o
+	$(OBJDIR)\aru_events\aru_events.o \
+	$(OBJDIR)\Kamera\Kamera_3D.o \
+	$(OBJDIR)\Vektor\Vektor.o
 
 .PHONEY: clean all
 
@@ -73,6 +75,14 @@ $(OBJDIR)\Dbl_Eingabe\Dbl_Eingabe.o: $(SRCDIR)\Dbl_Eingabe\Dbl_Eingabe.cpp $(SRC
 
 $(OBJDIR)\aru_events\aru_events.o: $(SRCDIR)\aru_events\aru_events.cpp $(SRCDIR)\aru_events\aru_events.h
 	if not exist $(OBJDIR)\aru_events mkdir $(OBJDIR)\aru_events
+	$(CXX) $(CPPFLAGS) $(DEFS) $(INCLUDES) -c $< -o $@
+
+$(OBJDIR)\Kamera\Kamera_3D.o: $(SRCDIR)\Kamera\Kamera_3D.cpp $(SRCDIR)\Kamera\Kamera_3D.h
+	if not exist $(OBJDIR)\Kamera mkdir $(OBJDIR)\Kamera
+	$(CXX) $(CPPFLAGS) $(DEFS) $(INCLUDES) -c $< -o $@
+
+$(OBJDIR)\Vektor\Vektor.o: $(SRCDIR)\Vektor\Vektor.cpp $(SRCDIR)\Vektor\Vektor.h
+	if not exist $(OBJDIR)\Vektor mkdir $(OBJDIR)\Vektor
 	$(CXX) $(CPPFLAGS) $(DEFS) $(INCLUDES) -c $< -o $@
 
 clean:
