@@ -9,6 +9,12 @@
 #include "Kamera\Kamera_3D.h"
 #include "Vektor\Vektor.h"
 
+struct PartikelBild
+{
+	Vektor ort;
+	double radius;
+};
+
 class MainApp: public wxApp
 {
   public:
@@ -23,8 +29,8 @@ class MainFrame: public wxFrame
 		void OnQuit(wxCommandEvent &event);
 		
 	private:
-		partikel *part_lst[3];
-		int anzPartikel = 3;
+		partikel *part_lst[5];
+		int anzPartikel = 5;
 		double gravKonst = 1.0;
 		wxTimer timer;
 		int timerTick = 50;

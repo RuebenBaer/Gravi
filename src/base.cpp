@@ -4,6 +4,7 @@
 #endif
 
 #include "base.h"
+#include "Liste\Verkettete_Liste.h"
 
 IMPLEMENT_APP(MainApp)
 
@@ -143,6 +144,8 @@ void MainFrame::OnPaint3D(wxPaintEvent &event)
 	Vektor tempOrt;
 	Vektor Ansicht, KameraStandpunkt;
 	double entfernung, msEntfernung;
+	Liste<PartikelBild> partBilder;
+	PartikelBild *pB;
 	
 	KameraStandpunkt = m_auge->HoleOrt();
 	msEntfernung = m_auge->HoleAbstand();
@@ -150,30 +153,46 @@ void MainFrame::OnPaint3D(wxPaintEvent &event)
 	{
 		tempOrt = Vektor(part_lst[i]->ort);
 		Ansicht = m_auge->Aufnahme(tempOrt);
+		Ansicht += Vektor(dc_Offset[0] - 200, dc_Offset[1], 0);
 		entfernung = (KameraStandpunkt - tempOrt).Laenge();
 		
 		int malRadius = part_lst[i]->radius * msEntfernung / entfernung;
 		if(malRadius < 1)malRadius = 1;
-		dc.DrawCircle((Ansicht.x() + dc_Offset[0] - 200),
-						(Ansicht.y() + dc_Offset[1]),
-						malRadius);
+		pB = new struct PartikelBild;
+		pB->ort = Ansicht;
+		pB->radius = malRadius;
+		
+		partBilder.Hinzufuegen(pB, false);
+		partBilder.GetErstesListenelement()->Wert(-entfernung);
 	}
 	m_auge->Verschieben(-50, 0, 0);
+	
 	KameraStandpunkt = m_auge->HoleOrt();
 	msEntfernung = m_auge->HoleAbstand();
 	for(int i = 0; i < anzPartikel; i++)
 	{
 		tempOrt = Vektor(part_lst[i]->ort);
 		Ansicht = m_auge->Aufnahme(tempOrt);
+		Ansicht += Vektor(dc_Offset[0] + 200, dc_Offset[1], 0);
 		entfernung = (KameraStandpunkt - tempOrt).Laenge();
 		
 		int malRadius = part_lst[i]->radius * msEntfernung / entfernung;
 		if(malRadius < 1)malRadius = 1;
-		dc.DrawCircle((Ansicht.x() + dc_Offset[0] + 200),
-						(Ansicht.y() + dc_Offset[1]),
-						malRadius);
+		pB = new struct PartikelBild;
+		pB->ort = Ansicht;
+		pB->radius = malRadius;
+		
+		partBilder.Hinzufuegen(pB, false);
+		partBilder.GetErstesListenelement()->Wert(-entfernung);
 	}
 	m_auge->Verschieben(50, 0, 0);
+	
+	partBilder.ListeNachWertSortieren();
+	
+	for(PartikelBild* aktPB = partBilder.GetErstesElement(); aktPB != NULL; aktPB = partBilder.GetNaechstesElement())
+	{
+		dc.DrawCircle(aktPB->ort.x(), aktPB->ort.y(), aktPB->radius);
+	}
 	return;
 }
 
