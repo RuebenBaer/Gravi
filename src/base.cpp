@@ -139,6 +139,7 @@ void MainFrame::OnPaint3D(wxPaintEvent &event)
 	if(m_auge == NULL)
 	{
 		dc.DrawText("Keine Kamera\nvorhanden", dc.GetSize().GetWidth() / 2, dc.GetSize().GetHeight() / 2);
+		return;
 	}
 	
 	Vektor tempOrt;
