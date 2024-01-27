@@ -9,10 +9,13 @@
 #include "Kamera\Kamera_3D.h"
 #include "Vektor\Vektor.h"
 
+double WertErmitteln(void* a);
+
 struct PartikelBild
 {
 	Vektor ort;
 	double radius;
+	double entfernung;
 };
 
 class MainApp: public wxApp
@@ -68,6 +71,7 @@ class MainFrame: public wxFrame
 		
 		void EinstellungenOeffnen(wxCommandEvent& event);
 		//DECLARE_EVENT_TABLE()
+		
 };
 
 enum

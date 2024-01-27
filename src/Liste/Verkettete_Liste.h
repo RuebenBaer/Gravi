@@ -56,7 +56,7 @@ template<class T> class Liste
       Listenelement<T>*letztesElement;
       Listenelement<T>* aktuellesElement;
       int listenGroesse;
-      void MengeInMitteTeilen(Listenelement<T> *Anfang, Listenelement<T> *Ende, double _min, double _max);
+      void MengeInMitteTeilen(Listenelement<T> *Anfang, Listenelement<T> *Ende, double _min, double _max, double (_Wert(void* a)));
   public:
       Liste();
       Liste(const Liste&);
@@ -83,7 +83,7 @@ template<class T> class Liste
       void AnsEndeStellen(T*);
       void Wert(T*, double);
       double Wert(T*);
-      void ListeNachWertSortieren();
+      void ListeNachWertSortieren(double (_Wert(void* a)));
 
       /*Logbuch*/
       void logSchreiben(const char*);
@@ -646,7 +646,7 @@ template<class T> T* Liste<T>::GetVorgaenger(T* ausgangsElement)
     return vorgaenger;
 }
 
-template<class T> void Liste<T>::MengeInMitteTeilen(Listenelement<T> *Anfang, Listenelement<T> *Ende, double _min, double _max)
+template<class T> void Liste<T>::MengeInMitteTeilen(Listenelement<T> *Anfang, Listenelement<T> *Ende, double _min, double _max, double (_Wert(void* a)))
 {
     Listenelement<T> *LE_Anfang = Anfang;
     Listenelement<T> *LE_Ende = Ende;
@@ -661,7 +661,7 @@ template<class T> void Liste<T>::MengeInMitteTeilen(Listenelement<T> *Anfang, Li
     if((LE_Anfang == NULL)||(LE_Ende == NULL))return;
     if(LE_Ende == LE_Anfang->GetNachfolger())
     {
-        if(LE_Ende->Wert()<LE_Anfang->Wert())Voranstellen(LE_Ende, LE_Anfang);
+        if((*_Wert)(LE_Ende->GetElement())<(*_Wert)(LE_Anfang->GetElement()))Voranstellen(LE_Ende, LE_Anfang);
         return;
     }
     /*Prüfen auf Rundungsprobleme oder Grenzgleichheit*/
@@ -683,7 +683,7 @@ template<class T> void Liste<T>::MengeInMitteTeilen(Listenelement<T> *Anfang, Li
     {
         tempLE = laeufer;
         laeufer = laeufer->GetNachfolger();
-        tempWert = tempLE->Wert();
+        tempWert = (*_Wert)(tempLE->GetElement());
         if(tempWert < mittelWert)
         {
             if(groessterMinWert < tempWert)groessterMinWert = tempWert;
@@ -703,14 +703,14 @@ template<class T> void Liste<T>::MengeInMitteTeilen(Listenelement<T> *Anfang, Li
         }
     }
 
-    tempWert = LE_Ende->Wert();
+    tempWert = (*_Wert)(LE_Ende->GetElement());
     if(tempWert < mittelWert)
     {
         if(groessterMinWert < tempWert)groessterMinWert = tempWert;
         if(LE_Ende == LE_neuesEnde)
         {
             LE_neuesEnde = LE_neuerAnfang = NULL;
-            MengeInMitteTeilen(LE_Anfang, LE_Ende, minWert, groessterMinWert);
+            MengeInMitteTeilen(LE_Anfang, LE_Ende, minWert, groessterMinWert, _Wert);
             return;
         }else{
             LE_neuerAnfang = LE_Ende->GetNachfolger();
@@ -723,18 +723,18 @@ template<class T> void Liste<T>::MengeInMitteTeilen(Listenelement<T> *Anfang, Li
             LE_Ende = LE_Ende->GetVorgaenger();
         }else{
             LE_Ende = LE_Anfang = NULL;
-            MengeInMitteTeilen(LE_neuerAnfang, LE_neuesEnde, kleinsterMaxWert, maxWert);
+            MengeInMitteTeilen(LE_neuerAnfang, LE_neuesEnde, kleinsterMaxWert, maxWert, _Wert);
             return;
         }
     }
 
     /*Teilabschnitte wieder unterteilen*/
-    MengeInMitteTeilen(LE_Anfang, LE_Ende, minWert, groessterMinWert);
-    MengeInMitteTeilen(LE_neuerAnfang, LE_neuesEnde, kleinsterMaxWert, maxWert);
+    MengeInMitteTeilen(LE_Anfang, LE_Ende, minWert, groessterMinWert, _Wert);
+    MengeInMitteTeilen(LE_neuerAnfang, LE_neuesEnde, kleinsterMaxWert, maxWert, _Wert);
     return;
 }
 
-template<class T> void Liste<T>::ListeNachWertSortieren()
+template<class T> void Liste<T>::ListeNachWertSortieren(double (_Wert(void* a)))
 {
     Listenelement<T> *laeufer, *Ende, *Anfang;
     double minWert, maxWert, tempWert;
@@ -744,7 +744,7 @@ template<class T> void Liste<T>::ListeNachWertSortieren()
     {
         Ende = laeufer;
         Anfang = laeufer;
-        minWert = maxWert = laeufer->Wert();
+        minWert = maxWert = (*_Wert)(laeufer->GetElement());
         laeufer = laeufer->GetNachfolger();
     }else{
         return;
@@ -753,12 +753,12 @@ template<class T> void Liste<T>::ListeNachWertSortieren()
     while(laeufer != NULL)
     {
         Ende = laeufer;
-        tempWert = laeufer->Wert();
+        tempWert = (*_Wert)(laeufer->GetElement());
         if(minWert > tempWert) minWert = tempWert;
         if(maxWert < tempWert) maxWert = tempWert;
         laeufer = laeufer->GetNachfolger();
     };
-    MengeInMitteTeilen(Anfang, Ende, minWert, maxWert);
+    MengeInMitteTeilen(Anfang, Ende, minWert, maxWert, _Wert);
     return;
 }
 

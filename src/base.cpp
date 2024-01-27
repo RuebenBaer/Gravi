@@ -162,6 +162,7 @@ void MainFrame::OnPaint3D(wxPaintEvent &event)
 		pB = new struct PartikelBild;
 		pB->ort = Ansicht;
 		pB->radius = malRadius;
+		pB->entfernung = -entfernung;
 		
 		partBilder.Hinzufuegen(pB, false);
 		partBilder.GetErstesListenelement()->Wert(-entfernung);
@@ -182,19 +183,26 @@ void MainFrame::OnPaint3D(wxPaintEvent &event)
 		pB = new struct PartikelBild;
 		pB->ort = Ansicht;
 		pB->radius = malRadius;
+		pB->entfernung = -entfernung;
 		
 		partBilder.Hinzufuegen(pB, false);
-		partBilder.GetErstesListenelement()->Wert(-entfernung);
+		//partBilder.GetErstesListenelement()->Wert(-entfernung);
 	}
 	m_auge->Verschieben(50, 0, 0);
 	
-	partBilder.ListeNachWertSortieren();
+	partBilder.ListeNachWertSortieren(&WertErmitteln);
 	
 	for(PartikelBild* aktPB = partBilder.GetErstesElement(); aktPB != NULL; aktPB = partBilder.GetNaechstesElement())
 	{
 		dc.DrawCircle(aktPB->ort.x(), aktPB->ort.y(), aktPB->radius);
 	}
 	return;
+}
+
+
+double WertErmitteln(void* a)
+{
+	return ((PartikelBild*)(a))->entfernung;
 }
 
 void MainFrame::OnPaintIdle(wxPaintEvent& event)
