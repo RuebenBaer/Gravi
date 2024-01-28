@@ -94,7 +94,7 @@ void px_font::FontIni(const char* fontDatei)
 	FILE* fZeichensatz = fopen(fontDatei, "r");
 	if(fZeichensatz != NULL)
 	{
-		int iZeichen, iZeichensatzStelle, iMinPos, iMaxPos;
+		int iZeichen, iMinPos, iMaxPos;
 		int iNummer = 0;
 		for(int it = 0; it < MAX_ZEICHEN; it++)
 		{

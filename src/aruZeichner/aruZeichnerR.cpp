@@ -59,11 +59,11 @@ void aruZeichnerR::ZeichneKreis(int iXm, int iYm, int iRadius)
 
 void aruZeichnerR::ZeichneBogen(int iXm, int iYm, int iRadius, float iAnfangsWinkel, float iEndWinkel)
 {
-	/*Bogen au�erhalb Zeichenflaeche*/
+	/*Bogen au�erhalb Zeichenflaeche
     if((iXm + iRadius < 0)||(iXm - iRadius >= m_iBreite)||(iYm + iRadius < 0)||(iYm - iRadius >= m_iHoehe))return;
 
     int iWehR = 0.7071067811865 * iRadius; //Wurzel 1/2
-	int x, y, iStelle;
+	int x, y, iStelle;*/
 
 
 	return;
@@ -369,37 +369,6 @@ void aruZeichnerR::ZeichneTrapezSenkrecht(int iMinX, int iMaxX, int iMinYu, int 
 
 void aruZeichnerR::Schrift(int posX, int posY, char* text, int pxGroesse)
 {
-  	int iGesBreite = 0;
-    int iVerschub = 0;
-    char c;
-  	for(int i = 0; text[i] != '\0'; i++)
-  	{
-  		c = text[i] - 48;
-      iGesBreite = m_pxSchrift.br[c] + 1;
-    }
-    iGesBreite -= 1;
-    if(iGesBreite >0)
-    {
-      bool bTextPause[iGesBreite * _PX_FONT_HOEHE];
-    }
-
-    for(int i = 0; text[i] != '\0'; i++)
-  	{
-		std::vector<PaarePaar*> vZeichen = m_pxSchrift.px_zeichensatz[c];
-		for(std::vector<PaarePaar*>::iterator it = vZeichen.begin(); ; it++)
-		{
-			if(it == vZeichen.end())
-			{
-			  break;
-			}
-			//bTextPause[]
-			ZeichneRechteck(((*it)->a[0])  + posX + iVerschub,
-							(-(*it)->a[1])  + posY,
-							((*it)->a[2]) + posX + iVerschub,
-							(-(*it)->a[3])  + posY);
-		}
-		iVerschub += (m_pxSchrift.br[c] + 1) * (pxGroesse / 7.0);
-  	}
   	return;
 }
 
@@ -407,11 +376,11 @@ void SkaliereSchrift(bool* bTextPause, unsigned int uiUrHoehe, unsigned int uiUr
 {
   uiNeueBreite = (((uiUrBreite * uiNeueHoehe * 10) / uiUrHoehe) + 5) / 10;
 
-  float ufRelLageReihe[uiNeueHoehe];
-  float ufRelLageSpalte[uiNeueBreite];
+  float *ufRelLageReihe = new float[uiNeueHoehe];
+  float *ufRelLageSpalte = new float[uiNeueBreite];
 
-  unsigned int uiIndexReihe[uiNeueHoehe];
-  unsigned int uiIndexSpalte[uiNeueBreite];
+  unsigned int *uiIndexReihe = new unsigned int[uiNeueHoehe];
+  unsigned int *uiIndexSpalte = new unsigned int[uiNeueBreite];
 
   for(unsigned int i=0; i < uiNeueHoehe; i++)
   {
@@ -442,6 +411,10 @@ void SkaliereSchrift(bool* bTextPause, unsigned int uiUrHoehe, unsigned int uiUr
           + (p0 - p1 + p2 - p3) * ufRelLageSpalte[i] * ufRelLageReihe[k];
     }
   }
+  delete []ufRelLageReihe;
+  delete []ufRelLageSpalte;
+  delete []uiIndexReihe;
+  delete []uiIndexSpalte;
   return;
 }
 

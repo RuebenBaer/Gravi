@@ -50,7 +50,11 @@ OBJ = \
 	$(OBJDIR)\Dbl_Eingabe\Dbl_Eingabe.o \
 	$(OBJDIR)\aru_events\aru_events.o \
 	$(OBJDIR)\Kamera\Kamera_3D.o \
-	$(OBJDIR)\Vektor\Vektor.o
+	$(OBJDIR)\Vektor\Vektor.o \
+	$(OBJDIR)\aruZeichner\aruZeichnerR.o \
+	$(OBJDIR)\aruZeichner\aruZeichnerGB.o \
+	$(OBJDIR)\aruZeichner\px_font.o
+	
 
 .PHONEY: clean all
 
@@ -83,6 +87,18 @@ $(OBJDIR)\Kamera\Kamera_3D.o: $(SRCDIR)\Kamera\Kamera_3D.cpp $(SRCDIR)\Kamera\Ka
 
 $(OBJDIR)\Vektor\Vektor.o: $(SRCDIR)\Vektor\Vektor.cpp $(SRCDIR)\Vektor\Vektor.h
 	if not exist $(OBJDIR)\Vektor mkdir $(OBJDIR)\Vektor
+	$(CXX) $(CPPFLAGS) $(DEFS) $(INCLUDES) -c $< -o $@
+
+$(OBJDIR)\aruZeichner\aruZeichnerR.o: $(SRCDIR)\aruZeichner\aruZeichnerR.cpp $(SRCDIR)\aruZeichner\aruZeichnerR.h
+	if not exist $(OBJDIR)\aruZeichner mkdir $(OBJDIR)\aruZeichner
+	$(CXX) $(CPPFLAGS) $(DEFS) $(INCLUDES) -c $< -o $@
+
+$(OBJDIR)\aruZeichner\aruZeichnerGB.o: $(SRCDIR)\aruZeichner\aruZeichnerGB.cpp $(SRCDIR)\aruZeichner\aruZeichnerGB.h
+	if not exist $(OBJDIR)\aruZeichner mkdir $(OBJDIR)\aruZeichner
+	$(CXX) $(CPPFLAGS) $(DEFS) $(INCLUDES) -c $< -o $@
+
+$(OBJDIR)\aruZeichner\px_font.o: $(SRCDIR)\aruZeichner\px_font.cpp $(SRCDIR)\aruZeichner\px_font.h
+	if not exist $(OBJDIR)\aruZeichner mkdir $(OBJDIR)\aruZeichner
 	$(CXX) $(CPPFLAGS) $(DEFS) $(INCLUDES) -c $< -o $@
 
 clean:

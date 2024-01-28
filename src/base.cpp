@@ -33,6 +33,7 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 	Bind(wxEVT_TIMER, &MainFrame::OnTimer, this, ID_TIMER);
 	Bind(wxEVT_KEY_DOWN, &MainFrame::OnKeyDown, this);
 	Bind(wxEVT_KEY_UP, &MainFrame::OnKeyUp, this);
+	Bind(wxEVT_ERASE_BACKGROUND, &MainFrame::OnEraseBackground, this);
 	
 	wxMenu *FileMenu = new wxMenu;
     wxMenuBar *MenuBar = new wxMenuBar;
@@ -97,7 +98,7 @@ void MainFrame::OnTimerStart(wxCommandEvent& event)
 	if(timer.IsRunning())
 	{
 		m_menuTimer->SetItemLabel("Starte Timer");
-		Unbind(wxEVT_PAINT, &MainFrame::OnPaint3D, this);
+		Unbind(wxEVT_PAINT, &MainFrame::OnPaintAnaglyphe, this);
 		Bind(wxEVT_PAINT, &MainFrame::OnPaintIdle, this);
 		timer.Stop();
 		Refresh();
@@ -106,7 +107,7 @@ void MainFrame::OnTimerStart(wxCommandEvent& event)
 	timer.Start(timerTick);
 	m_menuTimer->SetItemLabel("Timer anhalten");
 	Unbind(wxEVT_PAINT, &MainFrame::OnPaintIdle, this);
-	Bind(wxEVT_PAINT, &MainFrame::OnPaint3D, this);
+	Bind(wxEVT_PAINT, &MainFrame::OnPaintAnaglyphe, this);
 	
 	return;
 }
@@ -114,6 +115,11 @@ void MainFrame::OnTimerStart(wxCommandEvent& event)
 void MainFrame::OnAnsichtWechsel(wxCommandEvent& event)
 {
 	
+	return;
+}
+
+void MainFrame::OnEraseBackground(wxEraseEvent& event)
+{
 	return;
 }
 
@@ -199,6 +205,91 @@ void MainFrame::OnPaint3D(wxPaintEvent &event)
 	return;
 }
 
+void MainFrame::OnPaintAnaglyphe(wxPaintEvent &event)
+{
+	wxPaintDC dc(this);
+	dc.SetPen(wxPen(wxColor(0, 0, 0)));
+	if(m_auge == NULL)
+	{
+		dc.DrawText("Keine Kamera\nvorhanden", dc.GetSize().GetWidth() / 2, dc.GetSize().GetHeight() / 2);
+		return;
+	}
+	
+	Vektor tempOrt;
+	Vektor Ansicht, KameraStandpunkt;
+	double entfernung, msEntfernung;
+	Liste<PartikelBild> partBilderL, partBilderR;
+	PartikelBild *pB;
+	
+	KameraStandpunkt = m_auge->HoleOrt();
+	msEntfernung = m_auge->HoleAbstand();
+	for(int i = 0; i < anzPartikel; i++)
+	{
+		tempOrt = Vektor(part_lst[i]->ort);
+		Ansicht = m_auge->Aufnahme(tempOrt);
+		Ansicht += Vektor(dc_Offset[0], dc_Offset[1], 0);
+		entfernung = (KameraStandpunkt - tempOrt).Laenge();
+		
+		int malRadius = part_lst[i]->radius * msEntfernung / entfernung;
+		if(malRadius < 1)malRadius = 1;
+		pB = new struct PartikelBild;
+		pB->ort = Ansicht;
+		pB->radius = malRadius;
+		pB->entfernung = -entfernung;
+		
+		partBilderL.Hinzufuegen(pB, false);
+	}
+	m_auge->Verschieben(-50, 0, 0);
+	
+	KameraStandpunkt = m_auge->HoleOrt();
+	msEntfernung = m_auge->HoleAbstand();
+	for(int i = 0; i < anzPartikel; i++)
+	{
+		tempOrt = Vektor(part_lst[i]->ort);
+		Ansicht = m_auge->Aufnahme(tempOrt);
+		Ansicht += Vektor(dc_Offset[0], dc_Offset[1], 0);
+		entfernung = (KameraStandpunkt - tempOrt).Laenge();
+		
+		int malRadius = part_lst[i]->radius * msEntfernung / entfernung;
+		if(malRadius < 1)malRadius = 1;
+		pB = new struct PartikelBild;
+		pB->ort = Ansicht;
+		pB->radius = malRadius;
+		pB->entfernung = -entfernung;
+		
+		partBilderR.Hinzufuegen(pB, false);
+	}
+	m_auge->Verschieben(50, 0, 0);
+	
+	partBilderL.ListeNachWertSortieren(&WertErmitteln);
+	partBilderR.ListeNachWertSortieren(&WertErmitteln);
+	
+	wxImage img;
+	bool erfolg = img.Create(dc.GetSize());
+	if(!erfolg)return;
+	
+	aruZeichnerR bildR(img.GetData(), img.GetHeight(), img.GetWidth());
+	aruZeichnerGB bildGB(img.GetData(), img.GetHeight(), img.GetWidth());
+	
+	bildR.HintergrundZeichnen(dc.GetBackground().GetColour().Red(),
+							dc.GetBackground().GetColour().Green(),
+							dc.GetBackground().GetColour().Blue());
+	bildGB.HintergrundZeichnen(dc.GetBackground().GetColour().Red(),
+							dc.GetBackground().GetColour().Green(),
+							dc.GetBackground().GetColour().Blue());
+	
+	for(PartikelBild* aktPB = partBilderL.GetErstesElement(); aktPB != NULL; aktPB = partBilderL.GetNaechstesElement())
+	{
+		bildGB.ZeichneKreis(aktPB->ort.x(), aktPB->ort.y(), aktPB->radius);
+	}
+	for(PartikelBild* aktPB = partBilderR.GetErstesElement(); aktPB != NULL; aktPB = partBilderR.GetNaechstesElement())
+	{
+		bildR.ZeichneKreis(aktPB->ort.x(), aktPB->ort.y(), aktPB->radius);
+	}
+	
+	dc.DrawBitmap(wxBitmap(img), 0, 0);
+	return;
+}
 
 double WertErmitteln(void* a)
 {

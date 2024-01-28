@@ -64,11 +64,11 @@ void aruZeichnerGB::ZeichneKreis(int iXm, int iYm, int iRadius)
 
 void aruZeichnerGB::ZeichneBogen(int iXm, int iYm, int iRadius, float iAnfangsWinkel, float iEndWinkel)
 {
-	/*Bogen au�erhalb Zeichenflaeche*/
+	/*Bogen au�erhalb Zeichenflaeche
     if((iXm + iRadius < 0)||(iXm - iRadius >= m_iBreite)||(iYm + iRadius < 0)||(iYm - iRadius >= m_iHoehe))return;
 
     int iWehR = 0.7071067811865 * iRadius; //Wurzel 1/2
-	int x, y, iStelle;
+	int x, y, iStelle;*/
 
 
 	return;
@@ -378,80 +378,7 @@ void aruZeichnerGB::ZeichneTrapezSenkrecht(int iMinX, int iMaxX, int iMinYu, int
 
 void aruZeichnerGB::Schrift(int posX, int posY, char* text, int pxGroesse)
 {
-  	int iGesBreite = 0;
-    int iVerschub = 0;
-    char c;
-  	for(int i = 0; text[i] != '\0'; i++)
-  	{
-  		c = text[i] - 48;
-      iGesBreite = m_pxSchrift.br[c] + 1;
-    }
-    iGesBreite -= 1;
-    if(iGesBreite >0)
-    {
-      bool bTextPause[iGesBreite * _PX_FONT_HOEHE];
-    }
-
-    for(int i = 0; text[i] != '\0'; i++)
-  	{
-		std::vector<PaarePaar*> vZeichen = m_pxSchrift.px_zeichensatz[c];
-		for(std::vector<PaarePaar*>::iterator it = vZeichen.begin(); ; it++)
-		{
-			if(it == vZeichen.end())
-			{
-			  break;
-			}
-			//bTextPause[]
-			ZeichneRechteck(((*it)->a[0])  + posX + iVerschub,
-							(-(*it)->a[1])  + posY,
-							((*it)->a[2]) + posX + iVerschub,
-							(-(*it)->a[3])  + posY);
-		}
-		iVerschub += (m_pxSchrift.br[c] + 1) * (pxGroesse / 7.0);
-  	}
   	return;
-}
-
-void SkaliereSchrift(bool* bTextPause, unsigned int uiUrHoehe, unsigned int uiUrBreite, unsigned int uiNeueHoehe, unsigned int& uiNeueBreite, float* fTextPause)
-{
-  uiNeueBreite = (((uiUrBreite * uiNeueHoehe * 10) / uiUrHoehe) + 5) / 10;
-
-  float ufRelLageReihe[uiNeueHoehe];
-  float ufRelLageSpalte[uiNeueBreite];
-
-  unsigned int uiIndexReihe[uiNeueHoehe];
-  unsigned int uiIndexSpalte[uiNeueBreite];
-
-  for(unsigned int i=0; i < uiNeueHoehe; i++)
-  {
-    ufRelLageReihe[i] = i * (uiUrHoehe - 1) / (uiNeueHoehe - 1);
-    uiIndexReihe[i] = ufRelLageReihe[i]; //Lage abrunden
-    ufRelLageReihe[i] -= uiIndexReihe[i]; //Lage auf Werte zwischen 0 und 1 beschränken
-  }
-  for(unsigned int i=0; i < uiNeueBreite; i++)
-  {
-    ufRelLageSpalte[i] = i * (uiUrBreite - 1) / (uiNeueBreite - 1);
-    uiIndexSpalte[i] = ufRelLageSpalte[i]; //Lage abrunden
-    ufRelLageSpalte[i] -= uiIndexSpalte[i]; //Lage auf Werte zwischen 0 und 1 beschränken
-  }
-  fTextPause = new float[uiNeueHoehe * uiNeueBreite];
-  float p0, p1, p2, p3;
-  for(unsigned int i = 0; i < uiNeueBreite - 1; i++)
-  {
-    for(unsigned int k = 0; i < uiNeueHoehe - 1; k++)
-    {
-      p0 = (float)(bTextPause[uiIndexSpalte[i] + uiIndexReihe[k] * uiUrBreite]);
-      p1 = (float)(bTextPause[uiIndexSpalte[i] + 1 + uiIndexReihe[k] * uiUrBreite]);
-      p2 = (float)(bTextPause[uiIndexSpalte[i] + 1 + (uiIndexReihe[k] + 1) * uiUrBreite]);
-      p3 = (float)(bTextPause[uiIndexSpalte[i] + (uiIndexReihe[k] + 1) * uiUrBreite]);
-
-      fTextPause[i + k * uiNeueBreite] = p0
-          + (p1-p0) * ufRelLageSpalte[i]
-          + (p3-p0) * ufRelLageReihe[k]
-          + (p0 - p1 + p2 - p3) * ufRelLageSpalte[i] * ufRelLageReihe[k];
-    }
-  }
-  return;
 }
 
 void aruZeichnerGB::HintergrundZeichnen(unsigned char r, unsigned char g, unsigned char b)

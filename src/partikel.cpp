@@ -72,8 +72,8 @@ void Aufprall(partikel &p1, partikel &p2)
 	if(lambda2 < 0)lambda2 = 0;
 	for(int i = 0; i < 3; i++)
 	{
-		p1.deltaGeschw[i] -= 1.999 * (lambda1 - lambda2) * richtung[i] * p2.masse / (p1.masse + p2.masse);
-		p2.deltaGeschw[i] -= 1.999 * (lambda2 - lambda1) * richtung[i] * p1.masse / (p1.masse + p2.masse);
+		p1.deltaGeschw[i] -= 2 * (lambda1 - lambda2) * richtung[i] * p2.masse / (p1.masse + p2.masse);
+		p2.deltaGeschw[i] -= 2 * (lambda2 - lambda1) * richtung[i] * p1.masse / (p1.masse + p2.masse);
 	}
 
 	return;

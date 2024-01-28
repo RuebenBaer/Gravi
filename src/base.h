@@ -8,6 +8,8 @@
 #include "PE_Dlg\ProgrammEinstellungenDlg.h"
 #include "Kamera\Kamera_3D.h"
 #include "Vektor\Vektor.h"
+#include "aruZeichner\aruZeichnerR.h"
+#include "aruZeichner\aruZeichnerGB.h"
 
 double WertErmitteln(void* a);
 
@@ -32,8 +34,8 @@ class MainFrame: public wxFrame
 		void OnQuit(wxCommandEvent &event);
 		
 	private:
-		partikel *part_lst[5];
-		int anzPartikel = 5;
+		partikel *part_lst[50];
+		int anzPartikel = 50;
 		double gravKonst = 1.0;
 		wxTimer timer;
 		int timerTick = 50;
@@ -55,6 +57,7 @@ class MainFrame: public wxFrame
 		void OnPaint(wxPaintEvent& event);
 		void OnPaintIdle(wxPaintEvent& event);
 		void OnPaint3D(wxPaintEvent& event);
+		void OnPaintAnaglyphe(wxPaintEvent &event);
 		
 		void OnTimer(wxTimerEvent& event);
 		void OnTimerStart(wxCommandEvent& event);
@@ -63,6 +66,8 @@ class MainFrame: public wxFrame
 		void OnLeftClick(wxMouseEvent& event);
 		void OnKeyDown(wxKeyEvent& event);
 		void OnKeyUp(wxKeyEvent& event);
+		
+		void OnEraseBackground(wxEraseEvent& event);
 		
 		void OnAnsichtWechsel(wxCommandEvent& event);
 		
