@@ -30,10 +30,12 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 	Bind(wxEVT_MOTION, &MainFrame::OnMouseMove, this);
 	Bind(wxEVT_LEFT_DOWN, MainFrame::OnLeftClick, this);
 	Bind(wxEVT_MENU, &MainFrame::EinstellungenOeffnen, this, ID_PE_DLG);
+	Bind(wxEVT_MENU, &MainFrame::OnAnsichtWechsel, this, ID_ANSICHT);
 	Bind(wxEVT_TIMER, &MainFrame::OnTimer, this, ID_TIMER);
 	Bind(wxEVT_KEY_DOWN, &MainFrame::OnKeyDown, this);
 	Bind(wxEVT_KEY_UP, &MainFrame::OnKeyUp, this);
 	Bind(wxEVT_ERASE_BACKGROUND, &MainFrame::OnEraseBackground, this);
+	AktPaint = &MainFrame::OnPaint3D;
 	
 	wxMenu *FileMenu = new wxMenu;
     wxMenuBar *MenuBar = new wxMenuBar;
@@ -98,7 +100,7 @@ void MainFrame::OnTimerStart(wxCommandEvent& event)
 	if(timer.IsRunning())
 	{
 		m_menuTimer->SetItemLabel("Starte Timer");
-		Unbind(wxEVT_PAINT, &MainFrame::OnPaintAnaglyphe, this);
+		Unbind(wxEVT_PAINT, AktPaint, this);
 		Bind(wxEVT_PAINT, &MainFrame::OnPaintIdle, this);
 		timer.Stop();
 		Refresh();
@@ -107,14 +109,22 @@ void MainFrame::OnTimerStart(wxCommandEvent& event)
 	timer.Start(timerTick);
 	m_menuTimer->SetItemLabel("Timer anhalten");
 	Unbind(wxEVT_PAINT, &MainFrame::OnPaintIdle, this);
-	Bind(wxEVT_PAINT, &MainFrame::OnPaintAnaglyphe, this);
+	Bind(wxEVT_PAINT, AktPaint, this);
 	
 	return;
 }
 
 void MainFrame::OnAnsichtWechsel(wxCommandEvent& event)
 {
-	
+	Unbind(wxEVT_PAINT, AktPaint, this);
+	if(AktPaint == &MainFrame::OnPaint3D)
+	{
+		AktPaint = &MainFrame::OnPaintAnaglyphe;
+	}else{
+		AktPaint = &MainFrame::OnPaint3D;
+	}
+	Bind(wxEVT_PAINT, AktPaint, this);
+	Refresh();
 	return;
 }
 
@@ -123,24 +133,11 @@ void MainFrame::OnEraseBackground(wxEraseEvent& event)
 	return;
 }
 
-void MainFrame::OnPaint(wxPaintEvent &event)
-{
-	wxPaintDC dc(this);
-	dc.SetPen(wxPen(wxColor(0, 0, 0)));
-	for(int i = 0; i < anzPartikel; i++)
-	{
-		int malRadius = part_lst[i]->radius * m_skalierung;
-		if(malRadius < 1)malRadius = 1;
-		dc.DrawCircle((part_lst[i]->ort[0] + dc_Offset[0]) * m_skalierung,
-						(part_lst[i]->ort[1] + dc_Offset[1]) * m_skalierung,
-						malRadius);
-	}
-	return;
-}
-
 void MainFrame::OnPaint3D(wxPaintEvent &event)
 {
 	wxPaintDC dc(this);
+	dc.SetBrush(wxBrush(dc.GetBackground()));
+	dc.DrawRectangle(wxPoint(0, 0), dc.GetSize());
 	dc.SetPen(wxPen(wxColor(0, 0, 0)));
 	if(m_auge == NULL)
 	{
@@ -299,6 +296,8 @@ double WertErmitteln(void* a)
 void MainFrame::OnPaintIdle(wxPaintEvent& event)
 {
 	wxPaintDC dc(this);
+	dc.SetBrush(wxBrush(dc.GetBackground()));
+	dc.DrawRectangle(wxPoint(0, 0), dc.GetSize());
 	dc.SetPen(wxPen(wxColor(0, 0, 0)));
 	for(int i = 0; i < anzPartikel; i++)
 	{

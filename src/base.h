@@ -53,11 +53,11 @@ class MainFrame: public wxFrame
 		double dc_Offset[2];
 		
 		wxMenuItem *m_menuTimer, *m_menuAnsicht;
-		
-		void OnPaint(wxPaintEvent& event);
+
 		void OnPaintIdle(wxPaintEvent& event);
 		void OnPaint3D(wxPaintEvent& event);
 		void OnPaintAnaglyphe(wxPaintEvent &event);
+		void (MainFrame::*AktPaint)(wxPaintEvent &event);
 		
 		void OnTimer(wxTimerEvent& event);
 		void OnTimerStart(wxCommandEvent& event);
