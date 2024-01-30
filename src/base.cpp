@@ -66,7 +66,7 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 		part_lst[i]->ort[0] = 200 + (double)(rand() % 2500) / 10.0;
 		part_lst[i]->ort[1] = 200 + (double)(rand() % 2500) / 10.0;
 		part_lst[i]->ort[2] = (double)(rand() % 2500) / 10.0;
-		part_lst[i]->masse = (double)(rand() % 10) + 1.0;
+		part_lst[i]->masse = (double)(rand() % 30) + 1.0;
 		part_lst[i]->radius = part_lst[i]->masse; // 5;
 	}
 	
@@ -75,6 +75,8 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 	
 	Vektor kStart(325, 325, 425);
 	m_auge = new Kamera(kStart, -90, 0, 50, 10);
+	
+	m_wertFkt = 1;
 	
 	Maximize(true);
 }
@@ -197,7 +199,7 @@ void MainFrame::OnPaint3D(wxPaintEvent &event)
 	
 	for(PartikelBild* aktPB = partBilder.GetErstesElement(); aktPB != NULL; aktPB = partBilder.GetNaechstesElement())
 	{
-		dc.DrawCircle(aktPB->ort.x(), aktPB->ort.y(), aktPB->radius);
+		if(aktPB->entfernung < 0)dc.DrawCircle(aktPB->ort.x(), aktPB->ort.y(), aktPB->radius);
 	}
 	return;
 }
@@ -268,12 +270,11 @@ void MainFrame::OnPaintAnaglyphe(wxPaintEvent &event)
 	aruZeichnerR bildR(img.GetData(), img.GetHeight(), img.GetWidth());
 	aruZeichnerGB bildGB(img.GetData(), img.GetHeight(), img.GetWidth());
 	
-	bildR.HintergrundZeichnen(dc.GetBackground().GetColour().Red(),
-							dc.GetBackground().GetColour().Green(),
-							dc.GetBackground().GetColour().Blue());
-	bildGB.HintergrundZeichnen(dc.GetBackground().GetColour().Red(),
-							dc.GetBackground().GetColour().Green(),
-							dc.GetBackground().GetColour().Blue());
+	bildR.HintergrundZeichnen(255, 255, 255);
+	bildGB.HintergrundZeichnen(255, 255, 255);
+	
+	bildR.SetzeFarbe(0, 0, 0);
+	bildGB.SetzeFarbe(0, 0, 0);
 	
 	for(PartikelBild* aktPB = partBilderL.GetErstesElement(); aktPB != NULL; aktPB = partBilderL.GetNaechstesElement())
 	{
@@ -332,9 +333,6 @@ void MainFrame::OnMouseWheel(wxMouseEvent& event)
     wxClientDC dc(this);
     //wxPoint MousePosition = event.GetLogicalPosition(dc);
     //double alteSkalierung = m_skalierung;
-	
-	m_wertFkt = 1;
-	if(m_shift)m_wertFkt = 10;
     
 	if(event.GetWheelRotation() < 0)
 	{
@@ -342,7 +340,7 @@ void MainFrame::OnMouseWheel(wxMouseEvent& event)
 		{
 			m_auge->InkrAbstand(1.0 * m_wertFkt);
 		}else{
-			m_auge->Verschieben(0, 0, 1.0 * m_wertFkt);
+			m_auge->Verschieben(0, 1.0 * m_wertFkt, 0);
 		}
 		//m_skalierung = m_skalierung / (1 + 0.1 * m_wertFkt);
 	}
@@ -352,7 +350,7 @@ void MainFrame::OnMouseWheel(wxMouseEvent& event)
 		{
 			m_auge->InkrAbstand(-1.0 * m_wertFkt);
 		}else{
-			m_auge->Verschieben(0, 0, -1.0 * m_wertFkt);
+			m_auge->Verschieben(0, -1.0 * m_wertFkt, 0);
 		}
 		//m_skalierung = m_skalierung * (1 + 0.1 * m_wertFkt);
 	}
@@ -435,11 +433,29 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
 	if(event.GetKeyCode() == WXK_SHIFT)
 	{
 		m_shift = true;
+		m_wertFkt = 10.0;
 	}
 	if(event.GetKeyCode() == WXK_CONTROL)
 	{
 		m_ctrl = true;
 	}
+	if(event.GetKeyCode() == 'W')
+	{
+		m_auge->Verschieben(0, 0, -1.0 * m_wertFkt);
+	}
+	if(event.GetKeyCode() == 'A')
+	{
+		m_auge->Verschieben(-1.0 * m_wertFkt, 0, 0);		
+	}
+	if(event.GetKeyCode() == 'S')
+	{
+		m_auge->Verschieben(0, 0, 1.0 * m_wertFkt);
+	}
+	if(event.GetKeyCode() == 'D')
+	{
+		m_auge->Verschieben(1.0 * m_wertFkt, 0, 0);		
+	}
+	Refresh();
 }
 
 void MainFrame::OnKeyUp(wxKeyEvent& event)
@@ -447,6 +463,7 @@ void MainFrame::OnKeyUp(wxKeyEvent& event)
 	if(event.GetKeyCode() == WXK_SHIFT)
 	{
 		m_shift = false;
+		m_wertFkt = 1.0;
 	}
 	if(event.GetKeyCode() == WXK_CONTROL)
 	{
