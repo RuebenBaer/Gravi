@@ -60,6 +60,7 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 	peDlg = new Programm_Einstellungen_Dialog(this);
 	
 	srand (time(NULL));
+	Vektor vZentrum(0, 0, 0);
 	for(int i = 0; i < anzPartikel; i++)
 	{
 		part_lst[i] = new partikel;
@@ -68,13 +69,14 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 		part_lst[i]->ort[2] = (double)(rand() % 2500) / 10.0;
 		part_lst[i]->masse = (double)(rand() % 30) + 1.0;
 		part_lst[i]->radius = part_lst[i]->masse; // 5;
+		vZentrum += Vektor(part_lst[i]->ort[0], part_lst[i]->ort[1], part_lst[i]->ort[2]);
 	}
+	vZentrum /= anzPartikel;
+	vZentrum += Vektor(-400, 0, 0);
+	m_auge = new Kamera(vZentrum, 0, 0, 50, 100);
 	
 	timer.SetOwner(this, ID_TIMER);
 	//timer.Start(timerTick);
-	
-	Vektor kStart(325, 325, 425);
-	m_auge = new Kamera(kStart, -90, 0, 50, 10);
 	
 	m_wertFkt = 1;
 	
@@ -138,6 +140,9 @@ void MainFrame::OnEraseBackground(wxEraseEvent& event)
 void MainFrame::OnPaint3D(wxPaintEvent &event)
 {
 	wxPaintDC dc(this);
+	int offsetx, offsety;
+	offsetx = dc.GetSize().GetWidth()/2;
+	offsety = dc.GetSize().GetHeight()/2;
 	dc.SetBrush(wxBrush(dc.GetBackground()));
 	dc.DrawRectangle(wxPoint(0, 0), dc.GetSize());
 	dc.SetPen(wxPen(wxColor(0, 0, 0)));
@@ -159,7 +164,7 @@ void MainFrame::OnPaint3D(wxPaintEvent &event)
 	{
 		tempOrt = Vektor(part_lst[i]->ort);
 		Ansicht = m_auge->Aufnahme(tempOrt);
-		Ansicht += Vektor(dc_Offset[0] - 200, dc_Offset[1], 0);
+		Ansicht += Vektor(offsetx - 100, offsety, 0);
 		entfernung = (KameraStandpunkt - tempOrt).Laenge();
 		
 		int malRadius = part_lst[i]->radius * msEntfernung / entfernung;
@@ -172,7 +177,7 @@ void MainFrame::OnPaint3D(wxPaintEvent &event)
 		partBilder.Hinzufuegen(pB, false);
 		partBilder.GetErstesListenelement()->Wert(-entfernung);
 	}
-	m_auge->Verschieben(-50, 0, 0);
+	m_auge->Verschieben(-10, 0, 0);
 	
 	KameraStandpunkt = m_auge->HoleOrt();
 	msEntfernung = m_auge->HoleAbstand();
@@ -180,7 +185,7 @@ void MainFrame::OnPaint3D(wxPaintEvent &event)
 	{
 		tempOrt = Vektor(part_lst[i]->ort);
 		Ansicht = m_auge->Aufnahme(tempOrt);
-		Ansicht += Vektor(dc_Offset[0] + 200, dc_Offset[1], 0);
+		Ansicht += Vektor(offsetx + 100, offsety, 0);
 		entfernung = (KameraStandpunkt - tempOrt).Laenge();
 		
 		int malRadius = part_lst[i]->radius * msEntfernung / entfernung;
@@ -193,7 +198,7 @@ void MainFrame::OnPaint3D(wxPaintEvent &event)
 		partBilder.Hinzufuegen(pB, false);
 		//partBilder.GetErstesListenelement()->Wert(-entfernung);
 	}
-	m_auge->Verschieben(50, 0, 0);
+	m_auge->Verschieben(10, 0, 0);
 	
 	partBilder.ListeNachWertSortieren(&WertErmitteln);
 	
@@ -207,6 +212,9 @@ void MainFrame::OnPaint3D(wxPaintEvent &event)
 void MainFrame::OnPaintAnaglyphe(wxPaintEvent &event)
 {
 	wxPaintDC dc(this);
+	//int offsetx, offsety;
+	//offsetx = dc.GetSize().GetWidth()/2;
+	//offsety = dc.GetSize().GetHeight()/2;
 	dc.SetPen(wxPen(wxColor(0, 0, 0)));
 	if(m_auge == NULL)
 	{
@@ -238,7 +246,7 @@ void MainFrame::OnPaintAnaglyphe(wxPaintEvent &event)
 		
 		partBilderL.Hinzufuegen(pB, false);
 	}
-	m_auge->Verschieben(-50, 0, 0);
+	m_auge->Verschieben(-10, 0, 0);
 	
 	KameraStandpunkt = m_auge->HoleOrt();
 	msEntfernung = m_auge->HoleAbstand();
@@ -258,7 +266,7 @@ void MainFrame::OnPaintAnaglyphe(wxPaintEvent &event)
 		
 		partBilderR.Hinzufuegen(pB, false);
 	}
-	m_auge->Verschieben(50, 0, 0);
+	m_auge->Verschieben(10, 0, 0);
 	
 	partBilderL.ListeNachWertSortieren(&WertErmitteln);
 	partBilderR.ListeNachWertSortieren(&WertErmitteln);
@@ -455,6 +463,9 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
 	{
 		m_auge->Verschieben(1.0 * m_wertFkt, 0, 0);		
 	}
+	SetStatusText(wxString::Format("Auge: %.3f | %.3f | %.3f, Mattscheibe: %.3f",
+									m_auge->HoleOrt().x(), m_auge->HoleOrt().y(), m_auge->HoleOrt().z(),
+									m_auge->HoleAbstand()));
 	Refresh();
 }
 

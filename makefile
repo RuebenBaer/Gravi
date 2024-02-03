@@ -50,6 +50,7 @@ OBJ = \
 	$(OBJDIR)\Dbl_Eingabe\Dbl_Eingabe.o \
 	$(OBJDIR)\aru_events\aru_events.o \
 	$(OBJDIR)\Kamera\Kamera_3D.o \
+	$(OBJDIR)\Matrix\Matrix.o \
 	$(OBJDIR)\Vektor\Vektor.o \
 	$(OBJDIR)\aruZeichner\aruZeichnerR.o \
 	$(OBJDIR)\aruZeichner\aruZeichnerGB.o \
@@ -83,6 +84,10 @@ $(OBJDIR)\aru_events\aru_events.o: $(SRCDIR)\aru_events\aru_events.cpp $(SRCDIR)
 
 $(OBJDIR)\Kamera\Kamera_3D.o: $(SRCDIR)\Kamera\Kamera_3D.cpp $(SRCDIR)\Kamera\Kamera_3D.h
 	if not exist $(OBJDIR)\Kamera mkdir $(OBJDIR)\Kamera
+	$(CXX) $(CPPFLAGS) $(DEFS) $(INCLUDES) -c $< -o $@
+
+$(OBJDIR)\Matrix\Matrix.o: $(SRCDIR)\Matrix\Matrix.cpp $(SRCDIR)\Matrix\Matrix.h
+	if not exist $(OBJDIR)\Matrix mkdir $(OBJDIR)\Matrix
 	$(CXX) $(CPPFLAGS) $(DEFS) $(INCLUDES) -c $< -o $@
 
 $(OBJDIR)\Vektor\Vektor.o: $(SRCDIR)\Vektor\Vektor.cpp $(SRCDIR)\Vektor\Vektor.h
