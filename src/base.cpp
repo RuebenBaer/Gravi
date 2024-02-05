@@ -10,7 +10,7 @@ IMPLEMENT_APP(MainApp)
 
 bool MainApp::OnInit()
 {
-   MainFrame *win = new MainFrame(_("Frame"), wxPoint (100, 100),
+   MainFrame *win = new MainFrame(_("Gravitationssimulator"), wxPoint (100, 100),
      wxSize(450, 340));
    win->Show(TRUE);
    SetTopWindow(win);
@@ -64,16 +64,16 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 	for(int i = 0; i < anzPartikel; i++)
 	{
 		part_lst[i] = new partikel;
-		part_lst[i]->ort[0] = 200 + (double)(rand() % 2500) / 10.0;
-		part_lst[i]->ort[1] = 200 + (double)(rand() % 2500) / 10.0;
+		part_lst[i]->ort[0] = (double)(rand() % 2500) / 10.0;
+		part_lst[i]->ort[1] = (double)(rand() % 2500) / 10.0;
 		part_lst[i]->ort[2] = (double)(rand() % 2500) / 10.0;
 		part_lst[i]->masse = (double)(rand() % 30) + 1.0;
-		part_lst[i]->radius = part_lst[i]->masse; // 5;
+		part_lst[i]->radius = part_lst[i]->masse / 5;
 		vZentrum += Vektor(part_lst[i]->ort[0], part_lst[i]->ort[1], part_lst[i]->ort[2]);
 	}
 	vZentrum /= anzPartikel;
-	vZentrum += Vektor(-400, 0, 0);
-	m_auge = new Kamera(vZentrum, 0, 0, 90, 1);
+	vZentrum += Vektor(400, 0, 0);
+	m_auge = new Kamera(vZentrum, 0, 0, 100, 1);
 	
 	timer.SetOwner(this, ID_TIMER);
 	//timer.Start(timerTick);
@@ -176,7 +176,7 @@ void MainFrame::OnPaint3D(wxPaintEvent &event)
 		partBilder.Hinzufuegen(pB, false);
 		//partBilder.GetErstesListenelement()->Wert(-entfernung);
 	}
-	m_auge->Verschieben(-10, 0, 0);
+	m_auge->Verschieben(-augenAbstand/2, 0, 0);
 	
 	KameraStandpunkt = m_auge->HoleOrt();
 	for(int i = 0; i < anzPartikel; i++)
@@ -195,13 +195,13 @@ void MainFrame::OnPaint3D(wxPaintEvent &event)
 		partBilder.Hinzufuegen(pB, false);
 		//partBilder.GetErstesListenelement()->Wert(-entfernung);
 	}
-	m_auge->Verschieben(10, 0, 0);
+	m_auge->Verschieben(augenAbstand/2, 0, 0);
 	
 	partBilder.ListeNachWertSortieren(&WertErmitteln);
 	
 	for(PartikelBild* aktPB = partBilder.GetErstesElement(); aktPB != NULL; aktPB = partBilder.GetNaechstesElement())
 	{
-		if(aktPB->entfernung > 0)dc.DrawCircle(aktPB->ort.x(), aktPB->ort.y(), aktPB->radius);
+		if(aktPB->entfernung < 0)dc.DrawCircle(aktPB->ort.x(), aktPB->ort.y(), aktPB->radius);
 	}
 	return;
 }
@@ -209,9 +209,9 @@ void MainFrame::OnPaint3D(wxPaintEvent &event)
 void MainFrame::OnPaintAnaglyphe(wxPaintEvent &event)
 {
 	wxPaintDC dc(this);
-	//int offsetx, offsety;
-	//offsetx = dc.GetSize().GetWidth()/2;
-	//offsety = dc.GetSize().GetHeight()/2;
+	int offsetx, offsety;
+	offsetx = dc.GetSize().GetWidth()/2;
+	offsety = dc.GetSize().GetHeight()/2;
 	dc.SetPen(wxPen(wxColor(0, 0, 0)));
 	if(m_auge == NULL)
 	{
@@ -231,7 +231,7 @@ void MainFrame::OnPaintAnaglyphe(wxPaintEvent &event)
 	{
 		tempOrt = Vektor(part_lst[i]->ort);
 		Ansicht = m_auge->Aufnahme(tempOrt);
-		Ansicht += Vektor(dc_Offset[0], dc_Offset[1], 0);
+		Ansicht += Vektor(offsetx, offsety, 0);
 		
 		int malRadius = part_lst[i]->radius * Ansicht.z();
 		if(malRadius < 1)malRadius = 1;
@@ -242,14 +242,14 @@ void MainFrame::OnPaintAnaglyphe(wxPaintEvent &event)
 		
 		partBilderL.Hinzufuegen(pB, false);
 	}
-	m_auge->Verschieben(-10, 0, 0);
+	m_auge->Verschieben(-augenAbstand/2, 0, 0);
 	
 	KameraStandpunkt = m_auge->HoleOrt();
 	for(int i = 0; i < anzPartikel; i++)
 	{
 		tempOrt = Vektor(part_lst[i]->ort);
 		Ansicht = m_auge->Aufnahme(tempOrt);
-		Ansicht += Vektor(dc_Offset[0], dc_Offset[1], 0);
+		Ansicht += Vektor(offsetx, offsety, 0);
 		
 		int malRadius = part_lst[i]->radius * Ansicht.z();
 		if(malRadius < 1)malRadius = 1;
@@ -260,7 +260,7 @@ void MainFrame::OnPaintAnaglyphe(wxPaintEvent &event)
 		
 		partBilderR.Hinzufuegen(pB, false);
 	}
-	m_auge->Verschieben(10, 0, 0);
+	m_auge->Verschieben(augenAbstand/2, 0, 0);
 	
 	partBilderL.ListeNachWertSortieren(&WertErmitteln);
 	partBilderR.ListeNachWertSortieren(&WertErmitteln);
@@ -280,11 +280,11 @@ void MainFrame::OnPaintAnaglyphe(wxPaintEvent &event)
 	
 	for(PartikelBild* aktPB = partBilderL.GetErstesElement(); aktPB != NULL; aktPB = partBilderL.GetNaechstesElement())
 	{
-		if(aktPB->entfernung > 0)bildGB.ZeichneKreis(aktPB->ort.x(), aktPB->ort.y(), aktPB->radius);
+		if(aktPB->entfernung < 0)bildGB.ZeichneKreis(aktPB->ort.x(), aktPB->ort.y(), aktPB->radius);
 	}
 	for(PartikelBild* aktPB = partBilderR.GetErstesElement(); aktPB != NULL; aktPB = partBilderR.GetNaechstesElement())
 	{
-		if(aktPB->entfernung > 0)bildR.ZeichneKreis(aktPB->ort.x(), aktPB->ort.y(), aktPB->radius);
+		if(aktPB->entfernung < 0)bildR.ZeichneKreis(aktPB->ort.x(), aktPB->ort.y(), aktPB->radius);
 	}
 	
 	dc.DrawBitmap(wxBitmap(img), 0, 0);
@@ -472,5 +472,15 @@ void MainFrame::OnKeyUp(wxKeyEvent& event)
 	if(event.GetKeyCode() == WXK_CONTROL)
 	{
 		m_ctrl = false;
+	}
+	if(event.GetKeyCode() == '+')
+	{
+		augenAbstand += m_wertFkt * 1;
+		SetStatusText(wxString::Format("Augenabstand = %.2f", augenAbstand));
+	}
+	if(event.GetKeyCode() == '-')
+	{
+		augenAbstand -= m_wertFkt * 1;
+		SetStatusText(wxString::Format("Augenabstand = %.2f", augenAbstand));
 	}
 }

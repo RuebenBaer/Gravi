@@ -34,9 +34,9 @@ class MainFrame: public wxFrame
 		void OnQuit(wxCommandEvent &event);
 		
 	private:
-		partikel *part_lst[5];
-		int anzPartikel = 5;
-		double gravKonst = 1.0;
+		partikel *part_lst[10];
+		int anzPartikel = 10;
+		double gravKonst = 100.0;
 		wxTimer timer;
 		int timerTick = 50;
 		
@@ -48,6 +48,7 @@ class MainFrame: public wxFrame
 		Programm_Einstellungen_Dialog* peDlg;
 		
 		Kamera *m_auge = NULL;
+		double augenAbstand = 30;
 		
 		double m_wertFkt, m_skalierung;
 		double dc_Offset[2];
