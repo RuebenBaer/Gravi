@@ -3,7 +3,7 @@
 #include "..\Vektor\Vektor.h"
 #include <iostream>
 
-Kamera::Kamera(Vektor& v_Standpunkt, double v_hoehenwinkel, double v_seitenwinkel, double v_FOV, double v_Abstand)
+Kamera::Kamera(Vektor& v_Standpunkt, double v_hoehenwinkel, double v_seitenwinkel, double v_FOV, double v_lwBreite)
 {
     sPkt = v_Standpunkt; /*Standpunkt*/
 
@@ -21,7 +21,8 @@ Kamera::Kamera(Vektor& v_Standpunkt, double v_hoehenwinkel, double v_seitenwinke
     r0.SetKoordinaten(sin_b, -cos_b, 0.0);
 
     _FOV = v_FOV;
-    msAbstand = v_Abstand;/*Abstand von der Mattscheibe*/
+    lwBreite = v_lwBreite;/*Breite der Leinwand / sichtbare Breite*/
+	SichtBreiteBerechnen();
 }
 
 Kamera::~Kamera()
@@ -31,7 +32,8 @@ Kamera::~Kamera()
 
 void Kamera::FOV(double v_FOV)
 {
-    _FOV = v_FOV;
+    _FOV = v_FOV*PI/180;
+	SichtBreiteBerechnen();
     return;
 }
 
@@ -83,11 +85,9 @@ Vektor Kamera::Aufnahme(const Vektor& realPkt)
     detcy = r0.z() * h0.x() - h0.z() * r0.x();
     detcz = r0.x() * h0.y() - h0.x() * r0.y();
 
-    Vektor delta_n0 = n0 * (-msAbstand);
-
-    xRueck = delta_n0.x() * detax + delta_n0.y() * detay + delta_n0.z() * detaz;
-    yRueck = delta_n0.x() * detbx + delta_n0.y() * detby + delta_n0.z() * detbz;
-    zRueck = delta_n0.x() * detcx + delta_n0.y() * detcy + delta_n0.z() * detcz;
+    xRueck = -sichtFkt * (n0.x() * detax + n0.y() * detay + n0.z() * detaz);
+    yRueck = -sichtFkt * (n0.x() * detbx + n0.y() * detby + n0.z() * detbz);
+    zRueck = -sichtFkt * (n0.x() * detcx + n0.y() * detcy + n0.z() * detcz);
 
     return(Vektor(xRueck/gDet, yRueck/gDet, zRueck/gDet));
 }
@@ -116,19 +116,29 @@ const Vektor Kamera::HoleBlickRichtung(void)
 }
 
 
-void Kamera::SetzeAbstand(double wert)
+void Kamera::SetzeLeinwandBreite(double wert)
 {
     if(wert>0)
     {
-        msAbstand = wert;
+        lwBreite = wert;
     }
+	SichtBreiteBerechnen();
+	return;
 }
 
-void Kamera::InkrAbstand(double wert)
+void Kamera::InkrLeinwandBreite(double wert)
 {
-    msAbstand += wert;
-    if(msAbstand<1)
+    lwBreite += wert;
+    if(lwBreite<1)
     {
-        msAbstand = 1;
+        lwBreite = 1;
     }
+	SichtBreiteBerechnen();
+	return;
+}
+
+void Kamera::SichtBreiteBerechnen(void)
+{
+	sichtFkt = tan(_FOV/2.0)*lwBreite*0.5;
+	return;
 }
