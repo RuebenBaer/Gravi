@@ -397,7 +397,7 @@ void MainFrame::OnMouseLook(wxMouseEvent& event)
 {
 	wxClientDC dc(this);
 	wxPoint neueMousePosition = event.GetLogicalPosition(dc);
-	m_auge->Drehen((-neueMousePosition.y+alteMousePosition.y)*0.0001, (-neueMousePosition.x+alteMousePosition.x)*0.0001);
+	m_auge->Drehen((neueMousePosition.y-alteMousePosition.y)*0.001, (-neueMousePosition.x+alteMousePosition.x)*0.001);
 	WarpPointer(alteMousePosition.x, alteMousePosition.y);
 	if(!(timer.IsRunning()))Refresh();
 	event.Skip();
