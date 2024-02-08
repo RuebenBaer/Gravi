@@ -54,7 +54,8 @@ OBJ = \
 	$(OBJDIR)\Vektor\Vektor.o \
 	$(OBJDIR)\aruZeichner\aruZeichnerR.o \
 	$(OBJDIR)\aruZeichner\aruZeichnerGB.o \
-	$(OBJDIR)\aruZeichner\px_font.o
+	$(OBJDIR)\aruZeichner\px_font.o \
+	$(OBJDIR)\resource.res
 	
 
 .PHONEY: clean all
@@ -105,6 +106,10 @@ $(OBJDIR)\aruZeichner\aruZeichnerGB.o: $(SRCDIR)\aruZeichner\aruZeichnerGB.cpp $
 $(OBJDIR)\aruZeichner\px_font.o: $(SRCDIR)\aruZeichner\px_font.cpp $(SRCDIR)\aruZeichner\px_font.h
 	if not exist $(OBJDIR)\aruZeichner mkdir $(OBJDIR)\aruZeichner
 	$(CXX) $(CPPFLAGS) $(DEFS) $(INCLUDES) -c $< -o $@
+
+$(OBJDIR)\resource.res: $(SRCDIR)\resource.rc
+	if not exist $(OBJDIR) mkdir $(OBJDIR)
+	windres.exe $(INCLUDES) -J rc -O coff -i $(SRCDIR)\resource.rc -o $(OBJDIR)\resource.res
 
 clean:
 	del /s /q $(OBJDIR)

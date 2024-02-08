@@ -63,7 +63,10 @@ class MainFrame: public wxFrame
 		void OnTimer(wxTimerEvent& event);
 		void OnTimerStart(wxCommandEvent& event);
 		void OnMouseWheel(wxMouseEvent& event);
+		
 		void OnMouseMove(wxMouseEvent& event);
+		void OnMouseLook(wxMouseEvent& event);
+		
 		void OnLeftClick(wxMouseEvent& event);
 		void OnKeyDown(wxKeyEvent& event);
 		void OnKeyUp(wxKeyEvent& event);

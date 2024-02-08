@@ -101,12 +101,18 @@ void MainFrame::OnQuit(wxCommandEvent & WXUNUSED(event))
 
 void MainFrame::OnTimerStart(wxCommandEvent& event)
 {
+	wxClientDC dc(this);
+	alteMousePosition = wxPoint(dc.GetSize().GetWidth()/2, dc.GetSize().GetHeight()/2);
+	WarpPointer(alteMousePosition.x, alteMousePosition.y);
+	
 	if(timer.IsRunning())
 	{
 		m_menuTimer->SetItemLabel("Starte Timer");
 		Unbind(wxEVT_PAINT, AktPaint, this);
 		Bind(wxEVT_PAINT, &MainFrame::OnPaintIdle, this);
 		timer.Stop();
+		Bind(wxEVT_MOTION, &MainFrame::OnMouseMove, this);
+		SetCursor(wxCURSOR_ARROW);
 		Refresh();
 		return;
 	}
@@ -114,6 +120,8 @@ void MainFrame::OnTimerStart(wxCommandEvent& event)
 	m_menuTimer->SetItemLabel("Timer anhalten");
 	Unbind(wxEVT_PAINT, &MainFrame::OnPaintIdle, this);
 	Bind(wxEVT_PAINT, AktPaint, this);
+	Bind(wxEVT_MOTION, &MainFrame::OnMouseLook, this);
+	SetCursor(wxCURSOR_BLANK);
 	
 	return;
 }
@@ -383,6 +391,17 @@ void MainFrame::OnMouseMove(wxMouseEvent& event)
 	}
     event.Skip();
     return;
+}
+
+void MainFrame::OnMouseLook(wxMouseEvent& event)
+{
+	wxClientDC dc(this);
+	wxPoint neueMousePosition = event.GetLogicalPosition(dc);
+	m_auge->Drehen((-neueMousePosition.y+alteMousePosition.y)*0.0001, (-neueMousePosition.x+alteMousePosition.x)*0.0001);
+	WarpPointer(alteMousePosition.x, alteMousePosition.y);
+	if(!(timer.IsRunning()))Refresh();
+	event.Skip();
+	return;
 }
 
 void MainFrame::OnLeftClick(wxMouseEvent& event)
