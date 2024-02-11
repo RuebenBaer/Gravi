@@ -20,7 +20,7 @@ Kamera::Kamera(Vektor& v_Standpunkt, double v_hoehenwinkel, double v_seitenwinke
     h0.SetKoordinaten(-sin_a*cos_b, -sin_a*sin_b, cos_a);
     r0.SetKoordinaten(sin_b, -cos_b, 0.0);
 
-    _FOV = v_FOV;
+    _FOV = v_FOV*PI/180;
     lwBreite = v_lwBreite;/*Breite der Leinwand / sichtbare Breite*/
 	SichtBreiteBerechnen();
 }
@@ -92,19 +92,6 @@ Vektor Kamera::Aufnahme(const Vektor& realPkt)
     return(Vektor(xRueck/gDet, yRueck/gDet, zRueck/gDet));
 }
 
-Vektor Kamera::Aufnahme2(const Vektor& realPkt)
-{
-    Vektor sehStrahl = sPkt;
-    sehStrahl = sehStrahl - realPkt;
-	
-	Matrix sysM(r0, h0, sehStrahl);
-
-	if(!sysM.MInverse())return(Vektor(0, 0, -1));
-
-	Vektor rueck = sysM * n0 * (-1.0);
-    return(rueck);
-}
-
 const Vektor Kamera::HoleOrt(void)
 {
     return(sPkt);
@@ -139,6 +126,6 @@ void Kamera::InkrLeinwandBreite(double wert)
 
 void Kamera::SichtBreiteBerechnen(void)
 {
-	sichtFkt = tan(_FOV/2.0)*lwBreite*0.5;
+	sichtFkt = lwBreite / (tan(_FOV/2.0)*2);
 	return;
 }

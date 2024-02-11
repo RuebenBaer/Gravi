@@ -12,6 +12,7 @@ bool MainApp::OnInit()
 {
    MainFrame *win = new MainFrame(_("Gravitationssimulator"), wxPoint (100, 100),
      wxSize(450, 340));
+   SetExitOnFrameDelete(TRUE);
    win->Show(TRUE);
    SetTopWindow(win);
 
@@ -29,6 +30,8 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 	Bind(wxEVT_MOUSEWHEEL, &MainFrame::OnMouseWheel, this);
 	Bind(wxEVT_MOTION, &MainFrame::OnMouseMove, this);
 	Bind(wxEVT_LEFT_DOWN, MainFrame::OnLeftClick, this);
+	Bind(wxEVT_RIGHT_DOWN, MainFrame::OnRightClick, this);
+	Bind(wxEVT_RIGHT_UP, MainFrame::OnRightUp, this);
 	Bind(wxEVT_MENU, &MainFrame::EinstellungenOeffnen, this, ID_PE_DLG);
 	Bind(wxEVT_MENU, &MainFrame::OnAnsichtWechsel, this, ID_ANSICHT);
 	Bind(wxEVT_TIMER, &MainFrame::OnTimer, this, ID_TIMER);
@@ -40,7 +43,7 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 	wxMenu *FileMenu = new wxMenu;
     wxMenuBar *MenuBar = new wxMenuBar;
 
-    FileMenu->Append(ID_MAINWIN_QUIT, _("&Quit"));
+    FileMenu->Append(ID_MAINWIN_QUIT, _("&Quit\tALT-F4"));
 	m_menuTimer = new wxMenuItem(FileMenu, ID_TIMER_START, "Starte Timer");
 	FileMenu->Append(m_menuTimer);
 	FileMenu->Append(ID_PE_DLG, "Einstellungen");
@@ -72,7 +75,7 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 		vZentrum += Vektor(part_lst[i]->ort[0], part_lst[i]->ort[1], part_lst[i]->ort[2]);
 	}
 	vZentrum /= anzPartikel;
-	vZentrum += Vektor(400, 0, 0);
+	vZentrum += Vektor(1000, 0, 0);
 	m_auge = new Kamera(vZentrum, 0, 0, 100, 1);
 	
 	timer.SetOwner(this, ID_TIMER);
@@ -111,17 +114,12 @@ void MainFrame::OnTimerStart(wxCommandEvent& event)
 		Unbind(wxEVT_PAINT, AktPaint, this);
 		Bind(wxEVT_PAINT, &MainFrame::OnPaintIdle, this);
 		timer.Stop();
-		Bind(wxEVT_MOTION, &MainFrame::OnMouseMove, this);
-		SetCursor(wxCURSOR_ARROW);
 		Refresh();
 		return;
 	}
 	timer.Start(timerTick);
 	m_menuTimer->SetItemLabel("Timer anhalten");
-	Unbind(wxEVT_PAINT, &MainFrame::OnPaintIdle, this);
 	Bind(wxEVT_PAINT, AktPaint, this);
-	Bind(wxEVT_MOTION, &MainFrame::OnMouseLook, this);
-	SetCursor(wxCURSOR_BLANK);
 	
 	return;
 }
@@ -412,6 +410,32 @@ void MainFrame::OnLeftClick(wxMouseEvent& event)
     return;
 }
 
+void MainFrame::OnRightClick(wxMouseEvent& event)
+{
+	if(timer.IsRunning())
+	{
+		wxClientDC dc(this);
+		alteMousePosition = event.GetLogicalPosition(dc);
+		Unbind(wxEVT_MOTION, &MainFrame::OnMouseMove, this);
+		Bind(wxEVT_MOTION, &MainFrame::OnMouseLook, this);
+		SetCursor(wxCURSOR_BLANK);
+	}
+	event.Skip();
+    return;
+}
+
+void MainFrame::OnRightUp(wxMouseEvent& event)
+{
+	if(timer.IsRunning())
+	{
+		Unbind(wxEVT_MOTION, &MainFrame::OnMouseLook, this);
+		Bind(wxEVT_MOTION, &MainFrame::OnMouseMove, this);
+		SetCursor(wxCURSOR_ARROW);
+	}
+	event.Skip();
+    return;
+}
+
 void MainFrame::EinstellungenOeffnen(wxCommandEvent& event)
 {
 	peDlg->ShowModal();
@@ -476,9 +500,19 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
 	{
 		m_auge->Verschieben(1.0 * m_wertFkt, 0, 0);		
 	}
-	SetStatusText(wxString::Format("Auge: %.3f | %.3f | %.3f",
-									m_auge->HoleOrt().x(), m_auge->HoleOrt().y(), m_auge->HoleOrt().z()));
+	if(event.GetKeyCode() == 'O')
+	{
+		m_auge->FOV(m_auge->FOV() + 1.0 * m_wertFkt);		
+	}
+	if(event.GetKeyCode() == 'P')
+	{
+		m_auge->FOV(m_auge->FOV() - 1.0 * m_wertFkt);	
+	}
+	SetStatusText(wxString::Format("Auge: %.3f | %.3f | %.3f -- FOV = %.2f",
+									m_auge->HoleOrt().x(), m_auge->HoleOrt().y(), m_auge->HoleOrt().z(),
+									m_auge->FOV()));
 	Refresh();
+	return;
 }
 
 void MainFrame::OnKeyUp(wxKeyEvent& event)
@@ -502,4 +536,5 @@ void MainFrame::OnKeyUp(wxKeyEvent& event)
 		augenAbstand -= m_wertFkt * 1;
 		SetStatusText(wxString::Format("Augenabstand = %.2f", augenAbstand));
 	}
+	return;
 }

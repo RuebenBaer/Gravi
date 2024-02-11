@@ -68,6 +68,8 @@ class MainFrame: public wxFrame
 		void OnMouseLook(wxMouseEvent& event);
 		
 		void OnLeftClick(wxMouseEvent& event);
+		void OnRightClick(wxMouseEvent& event);
+		void OnRightUp(wxMouseEvent& event);
 		void OnKeyDown(wxKeyEvent& event);
 		void OnKeyUp(wxKeyEvent& event);
 		
