@@ -75,7 +75,7 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 		vZentrum += Vektor(part_lst[i]->ort[0], part_lst[i]->ort[1], part_lst[i]->ort[2]);
 	}
 	vZentrum /= anzPartikel;
-	vZentrum += Vektor(1000, 0, 0);
+	vZentrum += Vektor(-1000, 0, 0);
 	m_auge = new Kamera(vZentrum, 0, 0, 100, 1);
 	
 	timer.SetOwner(this, ID_TIMER);
@@ -170,7 +170,7 @@ void MainFrame::OnPaint3D(wxPaintEvent &event)
 	{
 		tempOrt = Vektor(part_lst[i]->ort);
 		Ansicht = m_auge->Aufnahme(tempOrt);
-		Ansicht += Vektor(offsetx - 100, offsety, 0);
+		Ansicht += Vektor(offsetx - 200, offsety, 0);
 		
 		int malRadius = part_lst[i]->radius * Ansicht.z();
 		if(malRadius < 1)malRadius = 1;
@@ -189,7 +189,7 @@ void MainFrame::OnPaint3D(wxPaintEvent &event)
 	{
 		tempOrt = Vektor(part_lst[i]->ort);
 		Ansicht = m_auge->Aufnahme(tempOrt);
-		Ansicht += Vektor(offsetx + 100, offsety, 0);
+		Ansicht += Vektor(offsetx + 200, offsety, 0);
 		
 		int malRadius = part_lst[i]->radius * Ansicht.z();
 		if(malRadius < 1)malRadius = 1;
@@ -484,21 +484,29 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
 	{
 		m_ctrl = true;
 	}
-	if(event.GetKeyCode() == 'W')
+	if(event.GetKeyCode() == WXK_SPACE)
 	{
 		m_auge->Verschieben(0, 0, -1.0 * m_wertFkt);
 	}
-	if(event.GetKeyCode() == 'A')
-	{
-		m_auge->Verschieben(-1.0 * m_wertFkt, 0, 0);		
-	}
-	if(event.GetKeyCode() == 'S')
+	if(event.GetKeyCode() == WXK_CONTROL)
 	{
 		m_auge->Verschieben(0, 0, 1.0 * m_wertFkt);
 	}
-	if(event.GetKeyCode() == 'D')
+	if(event.GetKeyCode() == 'W')
 	{
 		m_auge->Verschieben(1.0 * m_wertFkt, 0, 0);		
+	}
+	if(event.GetKeyCode() == 'S')
+	{
+		m_auge->Verschieben(-1.0 * m_wertFkt, 0, 0);		
+	}
+	if(event.GetKeyCode() == 'A')
+	{
+		m_auge->Verschieben(0, -1.0 * m_wertFkt, 0);		
+	}
+	if(event.GetKeyCode() == 'D')
+	{
+		m_auge->Verschieben(0, 1.0 * m_wertFkt, 0);		
 	}
 	if(event.GetKeyCode() == 'O')
 	{

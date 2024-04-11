@@ -44,10 +44,10 @@ public:
 	
 	/**
 	* Verschiebt die Kameraposition  
-	* jeweils nach rechts, nach vorne und nach oben bei positiven Werten  
+	* jeweils nach vorne, nach rechts und nach oben bei positiven Werten  
 	* bzw. nach links, nach hinten und nach unten bei negativen Werten
 	*/
-    void Verschieben(double nachRechts, double nachVorne, double nachOben);
+    void Verschieben(double nachVorne, double nachRechts, double nachOben);
 	
 	/**Dreht die Kamera um HW (Höhenwinkel) um die Waagerechte und um SW (Seitenwinkel) um die Senkrechte*/
     void Drehen(double HW, double SW);

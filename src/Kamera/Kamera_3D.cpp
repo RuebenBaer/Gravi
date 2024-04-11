@@ -37,7 +37,7 @@ void Kamera::FOV(double v_FOV)
     return;
 }
 
-void Kamera::Verschieben(double rechts, double vorne, double oben) /*negative werte verschieben nach links, hinten oder unten*/
+void Kamera::Verschieben(double vorne, double rechts, double oben) /*negative werte verschieben nach links, hinten oder unten*/
 {
     sPkt = sPkt + (r0 * rechts + n0 * vorne + h0 * oben);
     return;
