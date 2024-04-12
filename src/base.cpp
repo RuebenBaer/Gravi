@@ -182,7 +182,7 @@ void MainFrame::OnPaint3D(wxPaintEvent &event)
 		partBilder.Hinzufuegen(pB, false);
 		//partBilder.GetErstesListenelement()->Wert(-entfernung);
 	}
-	m_auge->Verschieben(-augenAbstand/2, 0, 0);
+	m_auge->Verschieben(0, -augenAbstand/2, 0);
 	
 	KameraStandpunkt = m_auge->HoleOrt();
 	for(int i = 0; i < anzPartikel; i++)
@@ -201,7 +201,7 @@ void MainFrame::OnPaint3D(wxPaintEvent &event)
 		partBilder.Hinzufuegen(pB, false);
 		//partBilder.GetErstesListenelement()->Wert(-entfernung);
 	}
-	m_auge->Verschieben(augenAbstand/2, 0, 0);
+	m_auge->Verschieben(0, augenAbstand/2, 0);
 	
 	partBilder.ListeNachWertSortieren(&WertErmitteln);
 	
@@ -248,7 +248,7 @@ void MainFrame::OnPaintAnaglyphe(wxPaintEvent &event)
 		
 		partBilderL.Hinzufuegen(pB, false);
 	}
-	m_auge->Verschieben(-augenAbstand/2, 0, 0);
+	m_auge->Verschieben(0, -augenAbstand/2, 0);
 	
 	KameraStandpunkt = m_auge->HoleOrt();
 	for(int i = 0; i < anzPartikel; i++)
@@ -266,7 +266,7 @@ void MainFrame::OnPaintAnaglyphe(wxPaintEvent &event)
 		
 		partBilderR.Hinzufuegen(pB, false);
 	}
-	m_auge->Verschieben(augenAbstand/2, 0, 0);
+	m_auge->Verschieben(0, augenAbstand/2, 0);
 	
 	partBilderL.ListeNachWertSortieren(&WertErmitteln);
 	partBilderR.ListeNachWertSortieren(&WertErmitteln);
@@ -299,7 +299,7 @@ void MainFrame::OnPaintAnaglyphe(wxPaintEvent &event)
 
 double WertErmitteln(void* a)
 {
-	return ((PartikelBild*)(a))->entfernung;
+	return -((PartikelBild*)(a))->entfernung;
 }
 
 void MainFrame::OnPaintIdle(wxPaintEvent& event)
