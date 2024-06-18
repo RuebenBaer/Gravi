@@ -76,7 +76,11 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 	}
 	vZentrum /= anzPartikel;
 	vZentrum += Vektor(-1000, 0, 0);
-	m_auge = new Kamera(vZentrum, 0, 0, 100, 1);
+	m_auge_links = new Kamera(vZentrum, 0, 0, 100, 1);
+	m_auge_links->Verschieben(0, -augenAbstand/2, 0);
+	
+	m_auge_rechts = new Kamera(vZentrum, 0, 0, 100, 1);
+	m_auge_rechts->Verschieben(0, augenAbstand/2, 0);
 	
 	timer.SetOwner(this, ID_TIMER);
 	//timer.Start(timerTick);
@@ -152,63 +156,64 @@ void MainFrame::OnPaint3D(wxPaintEvent &event)
 	dc.SetBrush(wxBrush(dc.GetBackground()));
 	dc.DrawRectangle(wxPoint(0, 0), dc.GetSize());
 	dc.SetPen(wxPen(wxColor(0, 0, 0)));
-	if(m_auge == NULL)
+	if((m_auge_links == NULL)||(m_auge_rechts == NULL))
 	{
 		dc.DrawText("Keine Kamera\nvorhanden", dc.GetSize().GetWidth() / 2, dc.GetSize().GetHeight() / 2);
 		return;
 	}
 	
-	m_auge->SetzeLeinwandBreite(dc.GetSize().GetWidth());
+	m_auge_links->SetzeLeinwandBreite(dc.GetSize().GetWidth());
+	m_auge_rechts->SetzeLeinwandBreite(dc.GetSize().GetWidth());
 	
 	Vektor tempOrt;
-	Vektor Ansicht, KameraStandpunkt;
-	Liste<PartikelBild> partBilder;
-	PartikelBild *pB;
+	Vektor Ansicht;
+	Liste<PartikelBild> partBilder_links, partBilder_rechts;
+	PartikelBild *pB_l, *pB_r;
+	int malRadius;
 	
-	KameraStandpunkt = m_auge->HoleOrt();
 	for(int i = 0; i < anzPartikel; i++)
 	{
 		tempOrt = Vektor(part_lst[i]->ort);
-		Ansicht = m_auge->Aufnahme(tempOrt);
+		Ansicht = m_auge_links->Aufnahme(tempOrt);
 		Ansicht += Vektor(offsetx - 200, offsety, 0);
-		
-		int malRadius = part_lst[i]->radius * Ansicht.z();
+
+		malRadius = part_lst[i]->radius * Ansicht.z();
 		if(malRadius < 1)malRadius = 1;
-		pB = new struct PartikelBild;
-		pB->ort = Ansicht;
-		pB->radius = malRadius;
-		pB->entfernung = -Ansicht.z();
-		
-		partBilder.Hinzufuegen(pB, false);
-		//partBilder.GetErstesListenelement()->Wert(-entfernung);
-	}
-	m_auge->Verschieben(0, -augenAbstand/2, 0);
-	
-	KameraStandpunkt = m_auge->HoleOrt();
-	for(int i = 0; i < anzPartikel; i++)
-	{
-		tempOrt = Vektor(part_lst[i]->ort);
-		Ansicht = m_auge->Aufnahme(tempOrt);
+		pB_l = new struct PartikelBild;
+		pB_l->ort = Ansicht;
+		pB_l->radius = malRadius;
+		pB_l->entfernung = -Ansicht.z();
+
+		partBilder_links.Hinzufuegen(pB_l, false);
+
+		Ansicht = m_auge_rechts->Aufnahme(tempOrt);
 		Ansicht += Vektor(offsetx + 200, offsety, 0);
-		
-		int malRadius = part_lst[i]->radius * Ansicht.z();
+
+		malRadius = part_lst[i]->radius * Ansicht.z();
 		if(malRadius < 1)malRadius = 1;
-		pB = new struct PartikelBild;
-		pB->ort = Ansicht;
-		pB->radius = malRadius;
-		pB->entfernung = -Ansicht.z();
-		
-		partBilder.Hinzufuegen(pB, false);
-		//partBilder.GetErstesListenelement()->Wert(-entfernung);
+		pB_r = new struct PartikelBild;
+		pB_r->ort = Ansicht;
+		pB_r->radius = malRadius;
+		pB_r->entfernung = -Ansicht.z();
+
+		partBilder_rechts.Hinzufuegen(pB_r, false);
 	}
-	m_auge->Verschieben(0, augenAbstand/2, 0);
+
+	partBilder_links.ListeNachWertSortieren(&WertErmitteln);
+	partBilder_rechts.ListeNachWertSortieren(&WertErmitteln);
 	
-	partBilder.ListeNachWertSortieren(&WertErmitteln);
-	
-	for(PartikelBild* aktPB = partBilder.GetErstesElement(); aktPB != NULL; aktPB = partBilder.GetNaechstesElement())
+	for(PartikelBild* aktPB = partBilder_links.GetErstesElement(); aktPB != NULL; aktPB = partBilder_links.GetNaechstesElement())
 	{
 		if(aktPB->entfernung < 0)dc.DrawCircle(aktPB->ort.x(), aktPB->ort.y(), aktPB->radius);
 	}
+	for(PartikelBild* aktPB = partBilder_rechts.GetErstesElement(); aktPB != NULL; aktPB = partBilder_rechts.GetNaechstesElement())
+	{
+		if(aktPB->entfernung < 0)dc.DrawCircle(aktPB->ort.x(), aktPB->ort.y(), aktPB->radius);
+	}
+	
+	partBilder_links.ListeLoeschen("3D");
+	partBilder_rechts.ListeLoeschen("3D");
+	
 	return;
 }
 
@@ -219,27 +224,28 @@ void MainFrame::OnPaintAnaglyphe(wxPaintEvent &event)
 	offsetx = dc.GetSize().GetWidth()/2;
 	offsety = dc.GetSize().GetHeight()/2;
 	dc.SetPen(wxPen(wxColor(0, 0, 0)));
-	if(m_auge == NULL)
+	if((m_auge_links == NULL)||(m_auge_rechts == NULL))
 	{
 		dc.DrawText("Keine Kamera\nvorhanden", dc.GetSize().GetWidth() / 2, dc.GetSize().GetHeight() / 2);
 		return;
 	}
 	
-	m_auge->SetzeLeinwandBreite(dc.GetSize().GetWidth());
+	m_auge_links->SetzeLeinwandBreite(dc.GetSize().GetWidth());
+	m_auge_rechts->SetzeLeinwandBreite(dc.GetSize().GetWidth());
 	
 	Vektor tempOrt;
-	Vektor Ansicht, KameraStandpunkt;
+	Vektor Ansicht;
 	Liste<PartikelBild> partBilderL, partBilderR;
 	PartikelBild *pB;
-	
-	KameraStandpunkt = m_auge->HoleOrt();
+	int malRadius;
+
 	for(int i = 0; i < anzPartikel; i++)
 	{
 		tempOrt = Vektor(part_lst[i]->ort);
-		Ansicht = m_auge->Aufnahme(tempOrt);
+		Ansicht = m_auge_links->Aufnahme(tempOrt);
 		Ansicht += Vektor(offsetx, offsety, 0);
 		
-		int malRadius = part_lst[i]->radius * Ansicht.z();
+		malRadius = part_lst[i]->radius * Ansicht.z();
 		if(malRadius < 1)malRadius = 1;
 		pB = new struct PartikelBild;
 		pB->ort = Ansicht;
@@ -247,17 +253,12 @@ void MainFrame::OnPaintAnaglyphe(wxPaintEvent &event)
 		pB->entfernung = -Ansicht.z();
 		
 		partBilderL.Hinzufuegen(pB, false);
-	}
-	m_auge->Verschieben(0, -augenAbstand/2, 0);
-	
-	KameraStandpunkt = m_auge->HoleOrt();
-	for(int i = 0; i < anzPartikel; i++)
-	{
+		
 		tempOrt = Vektor(part_lst[i]->ort);
-		Ansicht = m_auge->Aufnahme(tempOrt);
+		Ansicht = m_auge_rechts->Aufnahme(tempOrt);
 		Ansicht += Vektor(offsetx, offsety, 0);
 		
-		int malRadius = part_lst[i]->radius * Ansicht.z();
+		malRadius = part_lst[i]->radius * Ansicht.z();
 		if(malRadius < 1)malRadius = 1;
 		pB = new struct PartikelBild;
 		pB->ort = Ansicht;
@@ -266,7 +267,6 @@ void MainFrame::OnPaintAnaglyphe(wxPaintEvent &event)
 		
 		partBilderR.Hinzufuegen(pB, false);
 	}
-	m_auge->Verschieben(0, augenAbstand/2, 0);
 	
 	partBilderL.ListeNachWertSortieren(&WertErmitteln);
 	partBilderR.ListeNachWertSortieren(&WertErmitteln);
@@ -292,6 +292,9 @@ void MainFrame::OnPaintAnaglyphe(wxPaintEvent &event)
 	{
 		if(aktPB->entfernung < 0)bildR.ZeichneKreis(aktPB->ort.x(), aktPB->ort.y(), aktPB->radius);
 	}
+
+	partBilderL.ListeLoeschen("Anaglyphe");
+	partBilderR.ListeLoeschen("Anaglyphe");
 	
 	dc.DrawBitmap(wxBitmap(img), 0, 0);
 	return;
@@ -348,9 +351,9 @@ void MainFrame::OnMouseWheel(wxMouseEvent& event)
 		{
 			
 		}else{
-			m_auge->Verschieben(0, 1.0 * m_wertFkt, 0);
+			m_auge_links->Verschieben(0, 1.0 * m_wertFkt, 0);
+			m_auge_rechts->Verschieben(0, 1.0 * m_wertFkt, 0);
 		}
-		//m_skalierung = m_skalierung / (1 + 0.1 * m_wertFkt);
 	}
 	if(event.GetWheelRotation() > 0)
 	{
@@ -358,15 +361,10 @@ void MainFrame::OnMouseWheel(wxMouseEvent& event)
 		{
 			
 		}else{
-			m_auge->Verschieben(0, -1.0 * m_wertFkt, 0);
+			m_auge_links->Verschieben(0, -1.0 * m_wertFkt, 0);
+			m_auge_rechts->Verschieben(0, -1.0 * m_wertFkt, 0);
 		}
-		//m_skalierung = m_skalierung * (1 + 0.1 * m_wertFkt);
 	}
-
-	//dc_Offset[0] -= MousePosition.x * ((1/alteSkalierung)-(1/m_skalierung));
-	//dc_Offset[1] -= MousePosition.y * ((1/alteSkalierung)-(1/m_skalierung));
-	//SetStatusText(wxString::Format("Offset: %.0f - %.0f / Skalierung: %5.5f", dc_Offset[0], dc_Offset[1], m_skalierung), 1);
-	SetStatusText(wxString::Format("Kamera: %.5f", m_auge->HoleOrt().z()), 1);
 
     Refresh();
     event.Skip();
@@ -395,7 +393,15 @@ void MainFrame::OnMouseLook(wxMouseEvent& event)
 {
 	wxClientDC dc(this);
 	wxPoint neueMousePosition = event.GetLogicalPosition(dc);
-	m_auge->Drehen((neueMousePosition.y-alteMousePosition.y)*0.001, (-neueMousePosition.x+alteMousePosition.x)*0.001);
+	
+	m_auge_links->Verschieben(0, augenAbstand/2, 0);
+	m_auge_links->Drehen((neueMousePosition.y-alteMousePosition.y)*0.001, (-neueMousePosition.x+alteMousePosition.x)*0.001);
+	m_auge_links->Verschieben(0, -augenAbstand/2, 0);
+
+	m_auge_rechts->Verschieben(0, -augenAbstand/2, 0);
+	m_auge_rechts->Drehen((neueMousePosition.y-alteMousePosition.y)*0.001, (-neueMousePosition.x+alteMousePosition.x)*0.001);
+	m_auge_rechts->Verschieben(0, augenAbstand/2, 0);
+
 	WarpPointer(alteMousePosition.x, alteMousePosition.y);
 	if(!(timer.IsRunning()))Refresh();
 	event.Skip();
@@ -486,39 +492,47 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
 	}
 	if(event.GetKeyCode() == WXK_SPACE)
 	{
-		m_auge->Verschieben(0, 0, -1.0 * m_wertFkt);
+		m_auge_links->Verschieben(0, 0, -1.0 * m_wertFkt);
+		m_auge_rechts->Verschieben(0, 0, -1.0 * m_wertFkt);
 	}
 	if(event.GetKeyCode() == WXK_CONTROL)
 	{
-		m_auge->Verschieben(0, 0, 1.0 * m_wertFkt);
+		m_auge_links->Verschieben(0, 0, 1.0 * m_wertFkt);
+		m_auge_rechts->Verschieben(0, 0, 1.0 * m_wertFkt);
 	}
 	if(event.GetKeyCode() == 'W')
 	{
-		m_auge->Verschieben(1.0 * m_wertFkt, 0, 0);		
+		m_auge_links->Verschieben(1.0 * m_wertFkt, 0, 0);
+		m_auge_rechts->Verschieben(1.0 * m_wertFkt, 0, 0);
 	}
 	if(event.GetKeyCode() == 'S')
 	{
-		m_auge->Verschieben(-1.0 * m_wertFkt, 0, 0);		
+		m_auge_links->Verschieben(-1.0 * m_wertFkt, 0, 0);
+		m_auge_rechts->Verschieben(-1.0 * m_wertFkt, 0, 0);		
 	}
 	if(event.GetKeyCode() == 'A')
 	{
-		m_auge->Verschieben(0, -1.0 * m_wertFkt, 0);		
+		m_auge_links->Verschieben(0, -1.0 * m_wertFkt, 0);
+		m_auge_rechts->Verschieben(0, -1.0 * m_wertFkt, 0);		
 	}
 	if(event.GetKeyCode() == 'D')
 	{
-		m_auge->Verschieben(0, 1.0 * m_wertFkt, 0);		
+		m_auge_links->Verschieben(0, 1.0 * m_wertFkt, 0);
+		m_auge_rechts->Verschieben(0, 1.0 * m_wertFkt, 0);		
 	}
 	if(event.GetKeyCode() == 'O')
 	{
-		m_auge->FOV(m_auge->FOV() + 1.0 * m_wertFkt);		
+		m_auge_links->FOV(m_auge_links->FOV() + 1.0 * m_wertFkt);
+		m_auge_rechts->FOV(m_auge_rechts->FOV() + 1.0 * m_wertFkt);		
 	}
 	if(event.GetKeyCode() == 'P')
 	{
-		m_auge->FOV(m_auge->FOV() - 1.0 * m_wertFkt);	
+		m_auge_links->FOV(m_auge_links->FOV() - 1.0 * m_wertFkt);
+		m_auge_rechts->FOV(m_auge_rechts->FOV() - 1.0 * m_wertFkt);
 	}
-	SetStatusText(wxString::Format("Auge: %.3f | %.3f | %.3f -- FOV = %.2f",
-									m_auge->HoleOrt().x(), m_auge->HoleOrt().y(), m_auge->HoleOrt().z(),
-									m_auge->FOV()));
+	SetStatusText(wxString::Format("Auge_links: %.3f | %.3f | %.3f -- FOV = %.2f",
+									m_auge_links->HoleOrt().x(), m_auge_links->HoleOrt().y(), m_auge_links->HoleOrt().z(),
+									m_auge_links->FOV()));
 	Refresh();
 	return;
 }

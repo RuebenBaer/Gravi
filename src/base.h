@@ -47,7 +47,8 @@ class MainFrame: public wxFrame
 		
 		Programm_Einstellungen_Dialog* peDlg;
 		
-		Kamera *m_auge = NULL;
+		Kamera *m_auge_links = NULL;
+		Kamera *m_auge_rechts = NULL;
 		double augenAbstand = 30;
 		
 		double m_wertFkt, m_skalierung;
